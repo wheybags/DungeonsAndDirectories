@@ -42,8 +42,8 @@ class Room(object):
         myDir = self.getDir(env)
         os.mkdir(myDir)
 
-        with open(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y), "wb") as f:
-            pass
+        #with open(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y), "wb") as f:
+        #    pass
 
         doors = []
 
@@ -276,6 +276,10 @@ def get_l1(l2):
 
     l = Level("game/l1", l1_raw, variables)
 
+    for fn in os.listdir("images/l1/"):
+        with open("images/l1/" + fn, "rb") as f:
+            l.resources.append(["images_" + fn, f.read()])
+
 
     # start room
     room = l.symToRoom['@'] 
@@ -284,6 +288,8 @@ def get_l1(l2):
     message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
     message += " Warily, you pull yourself up onto your feet."
     room.messages.append([message, {}])
+    room.levelResources.append(["images_dungeon.jpg", "dungeon.jpg"])
+    
 
     # chasm room
     room = l.symToRoom['y']
@@ -296,9 +302,11 @@ def get_l1(l2):
     deathMessage = "You take a few steps back, run up, and leap towards the door. At the midway point you see over a lump in the door frame,\n"
     deathMessage += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
     deathMessage += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
+    deathRoom = l.deathRoom(deathMessage)
+    deathRoom.levelResources.append(["images_chasm.png", "chasm.png"])
 
     room.suppressDirections = ['North']
-    room.choices.append(['Move North (Try to jump the gap)', l.deathRoom(deathMessage), {}, {}, False])
+    room.choices.append(['Move North (Try to jump the gap)', deathRoom, {}, {}, False])
 
     # puddle room
     room = l.symToRoom['x']
@@ -309,8 +317,11 @@ def get_l1(l2):
     room.messages.append([message, {}])
 
     deathMessage = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod?\n"
+    deathRoom = l.deathRoom(deathMessage)
+    deathRoom.levelResources.append(["images_cliff_walk.jpg", "you.jpg"])
+
     room.suppressDirections = ['South']
-    room.choices.append(['Move South', l.deathRoom(deathMessage), {}, {}, False])
+    room.choices.append(['Move South', deathRoom, {}, {}, False])
     
     # map room
     room = l.symToRoom['m']
@@ -328,7 +339,8 @@ def get_l1(l2):
     room.messages.append([message, {}])
 
     room.levelResources.append(["map.txt", "map.txt"])
-
+    
+    # fork room
     room = l.symToRoom['f']
     message = "You see a fork in the path ahead of you. A foul smell wafts towards your nostrils from the East passage.\n"
     message += "From the West passage, you think you can feel a slight breeze of fresh air."
@@ -341,6 +353,8 @@ def get_l1(l2):
     message = "As you enter the room, you notice a glint of something shiny poking through the dirt under your boot.\n"
     message += "You bend to examine it. It's a key! That might come in handy."
     room.messages.append([message, {"hasKey": False}])
+    
+    room.levelResources.append(["images_key.png", "key.png"])
    
     # door room 
     room = l.symToRoom['d']
@@ -360,9 +374,12 @@ def get_l1(l2):
     openDoorMessage += "The door reveals a short corridoor leading to a spiral staircase, heading up towards the surface."
     goToL2Room = l.messageRoom(openDoorMessage)
     goToL2Room.choices.append(["Climb the staircase", l2.symToRoom['@'], l2.defaultValues, {}, True])
+    goToL2Room.levelResources.append(["images_stairs.jpg", "stairs.jpg"])
 
     room.choices.append(['Go through the door', goToL2Room, {}, {"hasKey": True}, False])
     room.choices.append(['Go through the door', cantOpenDoorRoom, {}, {"hasKey": False}, False])
+    
+    room.levelResources.append(["images_door.jpg", "door.jpg"])
 
     return l
 
@@ -385,13 +402,19 @@ def get_l2():
     l.defaultValues = {k: True for k in variables}
     l.defaultValues["sword"] = False
     l.defaultValues["shield"] = False
+
+    for fn in os.listdir("images/l2/"):
+        with open("images/l2/" + fn, "rb") as f:
+            l.resources.append(["images_" + fn, f.read()])
+
     
     # start room
     room = l.symToRoom['@']
     
     startMessage = "Just as you step off the stairs onto the new level, the staircase begins to grumble and crunch behind you.\n"
     startMessage += "It collapses into a pile of rubble, leaving just a deep hole.\n"
-    startMessage += "You won't be going back that way."
+    startMessage += "You won't be going back that way.\n" 
+    startMessage += "You take a look at your map, and realise that you've left the covered area. You'll need to start making your own.\n"
     room.messages.append([startMessage, {}])
 
     # fork room
@@ -428,6 +451,8 @@ def get_l2():
     room = l.symToRoom['b']
     message = "The light is getting brighter! You must have found a tunnel to the surface!.\n"
     room.messages.append([message, {}])
+    
+    room.levelResources.append(["images_tunnel.jpg", "tunnel.jpg"])
 
     # exit corridoor 2
     room = l.symToRoom['c']
@@ -436,12 +461,14 @@ def get_l2():
     message += "REDACTED"
     room.messages.append([message, {}])
     room.suppressDirections = ['North', 'East', 'South', 'West']
+    room.levelResources.append(["images_winner.jpg", "winner.jpg"])
 
 
     # ogre room
     room = l.symToRoom['o']
 
     room.suppressDirections = ['South', 'East', 'North', 'West']
+    room.levelResources.append(["images_ogre.jpg", "ogre.jpg"])
 
     hpTable = [(False,False,False), (False,False,True), (False,True,False), (False,True,True), (True,False,False), (True,False,True), (True,True,False), (True,True,True)]
     
@@ -542,7 +569,7 @@ l2.render()
 l1.render()
 
 # set up a start point
-startRoom = l1.symToRoom['@'] 
+startRoom = l2.symToRoom['@'] 
 try:
     os.remove("start")
 except:
