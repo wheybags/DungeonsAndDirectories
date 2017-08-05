@@ -274,7 +274,7 @@ def get_l1(l2):
 
     variables = ["hasKey"]
 
-    l = Level("game/l1", l1_raw, variables)
+    l = Level(".game/l1", l1_raw, variables)
 
     for fn in os.listdir("images/l1/"):
         with open("images/l1/" + fn, "rb") as f:
@@ -398,7 +398,7 @@ def get_l2():
 
     variables = ["ogre_0", "ogre_1", "ogre_2", "player_0", "player_1", "player_2", "sword", "shield"]
 
-    l = Level("game/l2", l2_raw, variables)
+    l = Level(".game/l2", l2_raw, variables)
     l.defaultValues = {k: True for k in variables}
     l.defaultValues["sword"] = False
     l.defaultValues["shield"] = False
@@ -456,7 +456,8 @@ def get_l2():
 
     # exit corridoor 2
     room = l.symToRoom['c']
-    message = "A door! You've done it! You made it out of the dungeon!\n"
+    message = "Light! You see a cave exit before you, with leaves and roots hanging across it.\n"
+    message += "You've done it! You made it out of the dungeon!\n"
     message += "REDACTED"
     message += "REDACTED"
     room.messages.append([message, {}])
@@ -569,10 +570,10 @@ l2.render()
 l1.render()
 
 # set up a start point
-startRoom = l2.symToRoom['@'] 
+startRoom = l1.symToRoom['@'] 
 try:
-    os.remove("start")
+    os.remove("Start Playing")
 except:
     pass
-os.symlink(os.path.relpath(startRoom.getDir(startRoom.level.defaultValues), '.'), "start")
+os.symlink(os.path.relpath(startRoom.getDir(startRoom.level.defaultValues), '.'), "Start Playing")
 
