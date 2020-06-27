@@ -1,6 +1,8 @@
 import os
 import shutil
 import hashlib
+import sys
+import subprocess
 
 directions = [
     ('North', (0, -1)),
@@ -8,6 +10,137 @@ directions = [
     ('South', (0, 1)),
     ('West', (-1, 0))
 ]
+
+def get_windows_path(path):
+    # only works on relative paths, but hey, it's good enough for us
+    return "\\\\?\\" + os.getcwd() + "\\" + path.replace("/", "\\")
+
+
+symlinks = []
+def mysymlink(dest, src):
+    symlinks.append((dest, src))
+    
+def finish_links():
+    for pair in symlinks:
+        real_make_link(pair[0], pair[1])
+
+def real_make_link(dest, src):
+    if sys.platform == 'win32':
+    
+        import ctypes
+        from ctypes import wintypes
+        _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+        _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+        _GetShortPathNameW.restype = wintypes.DWORD
+        
+        def get_short_path_name(long_name):
+            """
+            Gets the short path name of a given long path.
+            http://stackoverflow.com/a/23598461/200291
+            """
+            output_buf_size = 0
+            while True:
+                output_buf = ctypes.create_unicode_buffer(output_buf_size)
+                needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+                if output_buf_size >= needed:
+                    return output_buf.value
+                else:
+                    output_buf_size = needed
+    
+        import subprocess
+
+        src = get_windows_path(src) + ".lnk"
+        dest = get_short_path_name(get_windows_path(dest))[4:]
+
+        powershell_command = "$WScriptShell = New-Object -ComObject WScript.Shell;$Shortcut = $WScriptShell.CreateShortcut(\"{}\"); $Shortcut.TargetPath = \"{}\"; $Shortcut.Save()".format(
+            src, dest)
+
+        subprocess.call(['powershell.exe', powershell_command])
+    else:
+        os.symlink(src, dest)
+
+def myopen(filename, mode):
+    if sys.platform == 'win32':  
+        return open(get_windows_path(filename), mode)
+    return open(filename, mode)
+	
+def mymkdir(path):
+    if sys.platform == 'win32':      
+        os.mkdir(get_windows_path(path))
+    else:
+        os.mkdir(path)
+        
+def mymakedirs(path):
+    if sys.platform == 'win32': 
+        print "MYMAKEDIRS", path
+        components = path.replace("\\", "/").split("/")
+        
+        current = []
+        for component in components:
+            current.append(component)
+            current_path = "\\\\?\\" + os.getcwd() + "\\" + ("\\".join(current))
+            
+            print current_path
+            
+            if not os.path.exists(current_path):
+                os.mkdir(current_path)
+                
+        print("FINISH--------")
+    else:
+        os.makedirs(path)
+        
+def myexists(path):
+    if sys.platform == 'win32':      
+        return os.path.exists(get_windows_path(path))
+    else:
+        return os.path.exists(path)
+        
+def myrmtree(path):
+    if sys.platform == 'win32': 
+        #path = get_windows_path(path)
+        
+        def process(_path):
+            print "PROCESSING", _path
+            if os.path.isdir(_path):
+                for child in os.listdir(_path):
+                    process(_path + "\\" + child)
+                os.rmdir(_path)
+            else:
+                os.remove(_path)
+            
+        process(get_windows_path(path))
+    else:
+        shutil.rmtree(path)
+	
+
+def test():
+
+    path = 'a' * 200
+    mymkdir(path)
+    mymkdir(path + "/" + path)
+
+    with myopen(path + "/" + path  + "/asd", "wb") as f:
+        pass
+        
+    mymkdir(path + "/b")
+
+
+    target = path + "/" + path
+    origin = path + "/b"
+    linkName = "testLink"
+
+
+    mysymlink(target, origin + "/" + linkName)
+
+    #print "QQQ", os.path.isdir(get_windows_path(origin + "/" + linkName)), os.path.islink (get_windows_path(origin + "/" + linkName))
+    #myrmtree(origin + "/" + linkName)
+    
+    finish_links()
+
+    exit()
+
+#test()
+
 
 def getEnvStr(env):
     s = ['']
@@ -40,10 +173,10 @@ class Room(object):
 
     def renderBasic(self, env):
         myDir = self.getDir(env)
-        os.mkdir(myDir)
+        mymkdir(myDir)
 
-        #with open(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y), "wb") as f:
-        #    pass
+        with myopen(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y), "wb") as f:
+            pass
 
         doors = []
 
@@ -86,7 +219,7 @@ class Room(object):
         
         msg = [x for x in message.split('\n') if x]
         for i in range(len(msg)):
-            with open(myDir + "/" + str(i).zfill(2) + "_" + msg[i], "wb") as f:
+            with myopen(myDir + "/" + str(i).zfill(2) + "_" + msg[i], "wb") as f:
                 pass
 
         for name, dest, envChange, envRequired, useChangeFull in self.choices:
@@ -204,10 +337,10 @@ class Level(object):
 
 
     def render(self):
-        if os.path.exists(self.baseDir):
-            shutil.rmtree(self.baseDir)
+        if myexists(self.baseDir):
+            myrmtree(self.baseDir)
 
-        os.makedirs(self.baseDir)
+        mymakedirs(self.baseDir)
 
         def perm(variables, vs, i, f):
             if i == len(variables):
@@ -231,12 +364,12 @@ class Level(object):
         perm(self.variables, {}, 0, renderOnePerm)
 
         for r in self.resources:
-            with open(self.baseDir + "/" + r[0], "wb") as f:
+            with myopen(self.baseDir + "/" + r[0], "wb") as f:
                 f.write(r[1])
 
     def renderTeleport(self, linkName, fromRoom, toRoom, fromEnv, toEnv):
         print "\tTELE FROM", fromRoom.x, fromRoom.y, "to", toRoom.x, toRoom.y, "called", linkName
-        os.symlink(os.path.relpath(toRoom.getDir(toEnv), fromRoom.getDir(fromEnv)), fromRoom.getDir(fromEnv) + "/" + linkName)
+        mysymlink(toRoom.getDir(toEnv), fromRoom.getDir(fromEnv) + "/" + linkName)
 
     def getMap(self, hilightPos = None):
         lines = []
@@ -255,7 +388,7 @@ class Level(object):
         return "\n".join(lines)
     
     def renderResourceInRoom(self, room, resourceName, nameInRoom, env):
-        os.symlink(os.path.relpath(self.baseDir + "/" + resourceName, room.getDir(env)), room.getDir(env) + "/" + nameInRoom)
+        mysymlink(self.baseDir + "/" + resourceName, room.getDir(env) + "/" + nameInRoom)
 
 
 def get_l1(l2):
@@ -277,7 +410,7 @@ def get_l1(l2):
     l = Level(".game/l1", l1_raw, variables)
 
     for fn in os.listdir("images/l1/"):
-        with open("images/l1/" + fn, "rb") as f:
+        with myopen("images/l1/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
 
@@ -293,7 +426,7 @@ def get_l1(l2):
 
     # chasm room
     room = l.symToRoom['y']
-    message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest. Could it be gold?\n"
+    message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest. Could it be gold...\n"
     message += "You start towards the door, and just catch yourself before you fall right off the edge of a deep, dark precipice.\n"
     message += "Between you and the North door, there's a huge crack in the rocky floor. It's about three metres wide, but you you reckon maybe you could jump it.\n"
     message += "There are also doors on the other walls of the room, on this side of the crack."
@@ -316,7 +449,7 @@ def get_l1(l2):
     message += "Good thing you didn't risk jumping that gap for a bleedin' puddle, you think to yourself.\n"
     room.messages.append([message, {}])
 
-    deathMessage = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod?\n"
+    deathMessage = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
     deathRoom = l.deathRoom(deathMessage)
     deathRoom.levelResources.append(["images_cliff_walk.jpg", "you.jpg"])
 
@@ -404,7 +537,7 @@ def get_l2():
     l.defaultValues["shield"] = False
 
     for fn in os.listdir("images/l2/"):
-        with open("images/l2/" + fn, "rb") as f:
+        with myopen("images/l2/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
     
@@ -421,7 +554,7 @@ def get_l2():
     room = l.symToRoom['f']
 
     message = "You come to a three way fork in the tunnel.\n"
-    message += "You think you see a spark of light down the Northern tunnel, maybe it's the way out?"
+    message += "You think you see a spark of light down the Northern tunnel, maybe it's the way out."
     room.messages.append([message, {}])
 
     # sword room
@@ -575,5 +708,7 @@ try:
     os.remove("Start Playing")
 except:
     pass
-os.symlink(os.path.relpath(startRoom.getDir(startRoom.level.defaultValues), '.'), "Start Playing")
+mysymlink(startRoom.getDir(startRoom.level.defaultValues), "Start Playing")
+
+finish_links()
 
