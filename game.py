@@ -11,46 +11,71 @@ directions = [
     ('West', (-1, 0))
 ]
 
-def get_windows_path(path):
-    # only works on relative paths, but hey, it's good enough for us
-    return "\\\\?\\" + os.getcwd() + "\\" + path.replace("/", "\\")
+if sys.platform == 'win32':
+    def get_windows_path(path):
+        # only works on relative paths, but hey, it's good enough for us
+        return "\\\\?\\" + os.getcwd() + "\\" + path.replace("/", "\\")
+        
+    import ctypes
+    from ctypes import wintypes
+    _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+    _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+    _GetShortPathNameW.restype = wintypes.DWORD
+    
+    def get_short_path_name(long_name):
+        """
+        Gets the short path name of a given long path.
+        http://stackoverflow.com/a/23598461/200291
+        """
+        output_buf_size = 0
+        while True:
+            output_buf = ctypes.create_unicode_buffer(output_buf_size)
+            needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+            if output_buf_size >= needed:
+                return output_buf.value
+            else:
+                output_buf_size = needed
 
 
 symlinks = []
+directories = []
+files = []
+
 def mysymlink(dest, src):
     symlinks.append((dest, src))
     
 def finish_links():
-    for pair in symlinks:
+
+    print "creating directories..."
+    for i in range(len(directories)):
+        if i % 100 == 0:
+            print "creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(int(float(i)/float(len(directories))*100)) + "%"
+        path = directories[i]
+        real_makedirs(path)
+    print "all directories created"
+    
+    print "creating files..."
+    for i in range(len(files)):
+        if i % 100 == 0:
+            print "creating files, " + str(i) + "/" + str(len(files)) + " " + str(int(float(i)/float(len(files))*100)) + "%"
+        path = files[i]
+        real_create_file(path)
+    print "all files created"
+    
+    print "creating links..."
+    for i in range(len(symlinks)):
+        if i % 100 == 0:
+            print "creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(int(float(i)/float(len(symlinks))*100)) + "%"
+        pair = symlinks[i]
         real_make_link(pair[0], pair[1])
+    print "all links created"        
+        
 
 def real_make_link(dest, src):
     if sys.platform == 'win32':
-    
-        import ctypes
-        from ctypes import wintypes
-        _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
-        _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
-        _GetShortPathNameW.restype = wintypes.DWORD
-        
-        def get_short_path_name(long_name):
-            """
-            Gets the short path name of a given long path.
-            http://stackoverflow.com/a/23598461/200291
-            """
-            output_buf_size = 0
-            while True:
-                output_buf = ctypes.create_unicode_buffer(output_buf_size)
-                needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
-                if output_buf_size >= needed:
-                    return output_buf.value
-                else:
-                    output_buf_size = needed
-    
-        import subprocess
 
         src = get_windows_path(src) + ".lnk"
-        dest = get_short_path_name(get_windows_path(dest))[4:]
+        dest = get_windows_path(dest)[4:]
 
         powershell_command = "$WScriptShell = New-Object -ComObject WScript.Shell;$Shortcut = $WScriptShell.CreateShortcut(\"{}\"); $Shortcut.TargetPath = \"{}\"; $Shortcut.Save()".format(
             src, dest)
@@ -63,16 +88,19 @@ def myopen(filename, mode):
     if sys.platform == 'win32':  
         return open(get_windows_path(filename), mode)
     return open(filename, mode)
-	
-def mymkdir(path):
-    if sys.platform == 'win32':      
-        os.mkdir(get_windows_path(path))
-    else:
-        os.mkdir(path)
+    
+def create_file(filename):
+    files.append(filename)
+        
+def real_create_file(filename):
+    with myopen(filename, "wb"):
+        pass
         
 def mymakedirs(path):
+    directories.append(path)
+        
+def real_makedirs(path):
     if sys.platform == 'win32': 
-        print "MYMAKEDIRS", path
         components = path.replace("\\", "/").split("/")
         
         current = []
@@ -80,12 +108,8 @@ def mymakedirs(path):
             current.append(component)
             current_path = "\\\\?\\" + os.getcwd() + "\\" + ("\\".join(current))
             
-            print current_path
-            
             if not os.path.exists(current_path):
                 os.mkdir(current_path)
-                
-        print("FINISH--------")
     else:
         os.makedirs(path)
         
@@ -96,11 +120,8 @@ def myexists(path):
         return os.path.exists(path)
         
 def myrmtree(path):
-    if sys.platform == 'win32': 
-        #path = get_windows_path(path)
-        
+    if sys.platform == 'win32':         
         def process(_path):
-            print "PROCESSING", _path
             if os.path.isdir(_path):
                 for child in os.listdir(_path):
                     process(_path + "\\" + child)
@@ -116,13 +137,12 @@ def myrmtree(path):
 def test():
 
     path = 'a' * 200
-    mymkdir(path)
-    mymkdir(path + "/" + path)
+    mymakedirs(path)
+    mymakedirs(path + "/" + path)
 
-    with myopen(path + "/" + path  + "/asd", "wb") as f:
-        pass
+    create_file(path + "/" + path  + "/asd")
         
-    mymkdir(path + "/b")
+    mymakedirs(path + "/b")
 
 
     target = path + "/" + path
@@ -173,10 +193,9 @@ class Room(object):
 
     def renderBasic(self, env):
         myDir = self.getDir(env)
-        mymkdir(myDir)
+        mymakedirs(myDir)
 
-        with myopen(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y), "wb") as f:
-            pass
+        create_file(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y))
 
         doors = []
 
@@ -219,8 +238,7 @@ class Room(object):
         
         msg = [x for x in message.split('\n') if x]
         for i in range(len(msg)):
-            with myopen(myDir + "/" + str(i).zfill(2) + "_" + msg[i], "wb") as f:
-                pass
+            create_file(myDir + "/" + str(i).zfill(2) + "_" + msg[i])
 
         for name, dest, envChange, envRequired, useChangeFull in self.choices:
             doThisChoice = True
@@ -229,7 +247,6 @@ class Room(object):
                     doThisChoice = False
                     break
             
-            print name, envRequired, doThisChoice
             if not doThisChoice:
                 continue
             
@@ -257,7 +274,6 @@ class Room(object):
 
         for dirName, offset in directions:
             if dirName in self.suppressDirections:
-                print 123
                 continue
 
             newCoords = (self.x + offset[0], self.y + offset[1])
@@ -337,9 +353,6 @@ class Level(object):
 
 
     def render(self):
-        if myexists(self.baseDir):
-            myrmtree(self.baseDir)
-
         mymakedirs(self.baseDir)
 
         def perm(variables, vs, i, f):
@@ -355,7 +368,6 @@ class Level(object):
         def renderOnePerm(env):
             for y in range(self.h):
                 for x in range(self.w):
-                    print "RENDERING", x, y
                     self.rooms[y][x].render(env)
 
             for k in self.specialRooms:
@@ -363,12 +375,11 @@ class Level(object):
 
         perm(self.variables, {}, 0, renderOnePerm)
 
-        for r in self.resources:
-            with myopen(self.baseDir + "/" + r[0], "wb") as f:
-                f.write(r[1])
+        #for r in self.resources:
+        #    with myopen(self.baseDir + "/" + r[0], "wb") as f:
+        #        f.write(r[1])
 
     def renderTeleport(self, linkName, fromRoom, toRoom, fromEnv, toEnv):
-        print "\tTELE FROM", fromRoom.x, fromRoom.y, "to", toRoom.x, toRoom.y, "called", linkName
         mysymlink(toRoom.getDir(toEnv), fromRoom.getDir(fromEnv) + "/" + linkName)
 
     def getMap(self, hilightPos = None):
@@ -694,21 +705,33 @@ def get_l2():
     return l
 
 
+def __main__():
+    print "cleaning up..."
+    if myexists(".game"):
+        myrmtree(".game")
+        
+    if myexists("Start Playing"):
+        os.remove("Start Playing")
+    if myexists("Start Playing.lnk"):
+        os.remove("Start Playing.lnk")
+        
+    print "cleanup done"
 
+    print "generating lists..."
+    l2 = get_l2()
+    l1 = get_l1(l2)
 
-l2 = get_l2()
-l1 = get_l1(l2)
+    l2.render()
+    l1.render()
+    print "generating lists done"
 
-l2.render()
-l1.render()
+    # set up a start point
+    startRoom = l1.symToRoom['@'] 
 
-# set up a start point
-startRoom = l1.symToRoom['@'] 
-try:
-    os.remove("Start Playing")
-except:
-    pass
-mysymlink(startRoom.getDir(startRoom.level.defaultValues), "Start Playing")
+    mysymlink(startRoom.getDir(startRoom.level.defaultValues), "Start Playing")
 
-finish_links()
+    finish_links()
+    
+if __name__ == "__main__":
+    __main__()
 
