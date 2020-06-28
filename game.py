@@ -46,29 +46,29 @@ def mysymlink(dest, src):
     
 def finish_links():
 
-    print "creating directories..."
+    print("creating directories...")
     for i in range(len(directories)):
         if i % 100 == 0:
-            print "creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(int(float(i)/float(len(directories))*100)) + "%"
+            print("creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(int(float(i)/float(len(directories))*100)) + "%")
         path = directories[i]
         real_makedirs(path)
-    print "all directories created"
+    print("all directories created")
     
-    print "creating files..."
+    print("creating files...")
     for i in range(len(files)):
         if i % 100 == 0:
-            print "creating files, " + str(i) + "/" + str(len(files)) + " " + str(int(float(i)/float(len(files))*100)) + "%"
+            print("creating files, " + str(i) + "/" + str(len(files)) + " " + str(int(float(i)/float(len(files))*100)) + "%")
         path = files[i]
         real_create_file(path)
-    print "all files created"
+    print("all files created")
     
-    print "creating links..."
+    print("creating links...")
     for i in range(len(symlinks)):
         if i % 100 == 0:
-            print "creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(int(float(i)/float(len(symlinks))*100)) + "%"
+            print("creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(int(float(i)/float(len(symlinks))*100)) + "%")
         pair = symlinks[i]
         real_make_link(pair[0], pair[1])
-    print "all links created"        
+    print("all links created")
         
 
 def real_make_link(dest, src):
@@ -165,7 +165,7 @@ def test():
 def getEnvStr(env):
     s = ['']
 
-    keys = env.keys()
+    keys = list(env.keys())
     keys.sort()
     for k in keys:
         s.append(k + "_" + str(env[k]))
@@ -293,7 +293,7 @@ class MessageRoom(Room):
 
     def getDir(self, env):
         sha_1 = hashlib.sha1()
-        sha_1.update(self.messages[0][0])
+        sha_1.update(self.messages[0][0].encode('utf-8'))
         thisHash = sha_1.hexdigest() + str(self.extraId)
         
         return self.level.baseDir + "/message_" + thisHash + getEnvStr(env)
@@ -706,7 +706,7 @@ def get_l2():
 
 
 def __main__():
-    print "cleaning up..."
+    print("cleaning up...")
     if myexists(".game"):
         myrmtree(".game")
         
@@ -715,15 +715,15 @@ def __main__():
     if myexists("Start Playing.lnk"):
         os.remove("Start Playing.lnk")
         
-    print "cleanup done"
+    print("cleanup done")
 
-    print "generating lists..."
+    print("generating lists...")
     l2 = get_l2()
     l1 = get_l1(l2)
 
     l2.render()
     l1.render()
-    print "generating lists done"
+    print("generating lists done")
 
     # set up a start point
     startRoom = l1.symToRoom['@'] 
@@ -734,4 +734,3 @@ def __main__():
     
 if __name__ == "__main__":
     __main__()
-
