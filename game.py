@@ -2,7 +2,6 @@ import os
 import shutil
 import hashlib
 import sys
-import subprocess
 
 directions = [
     ('North', (0, -1)),
@@ -12,12 +11,14 @@ directions = [
 ]
 
 if sys.platform == 'win32':
+    import swinlnk
+    import ctypes
+    from ctypes import wintypes
+
     def get_windows_path(path):
         # only works on relative paths, but hey, it's good enough for us
         return "\\\\?\\" + os.getcwd() + "\\" + path.replace("/", "\\")
-        
-    import ctypes
-    from ctypes import wintypes
+
     _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
     _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
     _GetShortPathNameW.restype = wintypes.DWORD
@@ -36,6 +37,8 @@ if sys.platform == 'win32':
             else:
                 output_buf_size = needed
 
+
+    swl = swinlnk.SWinLnk()
 
 symlinks = []
 directories = []
@@ -73,14 +76,10 @@ def finish_links():
 
 def real_make_link(dest, src):
     if sys.platform == 'win32':
-
         src = get_windows_path(src) + ".lnk"
         dest = get_windows_path(dest)[4:]
 
-        powershell_command = "$WScriptShell = New-Object -ComObject WScript.Shell;$Shortcut = $WScriptShell.CreateShortcut(\"{}\"); $Shortcut.TargetPath = \"{}\"; $Shortcut.Save()".format(
-            src, dest)
-
-        subprocess.call(['powershell.exe', powershell_command])
+        swl.create_lnk(dest, src)
     else:
         os.symlink(src, dest)
 
