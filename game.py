@@ -2,6 +2,7 @@ import os
 import shutil
 import hashlib
 import sys
+import subprocess
 
 directions = [
     ('North', (0, -1)),
@@ -53,32 +54,34 @@ def mysymlink(dest, src):
 
 
 def finish_links():
-    print("creating directories...")
+    total = len(directories) + len(files) + len(symlinks)
+    done = 0
+
+    report_interval = 300
+
     for i in range(len(directories)):
-        if i % 100 == 0:
-            print("creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(
-                int(float(i) / float(len(directories)) * 100)) + "%")
+        if i % report_interval == 0:
+            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+        done += 1
+
         path = directories[i]
         real_makedirs(path)
-    print("all directories created")
 
-    print("creating files...")
     for i in range(len(files)):
-        if i % 100 == 0:
-            print("creating files, " + str(i) + "/" + str(len(files)) + " " + str(
-                int(float(i) / float(len(files)) * 100)) + "%")
+        if i % report_interval == 0:
+            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+        done += 1
+
         pair = files[i]
         real_create_file(pair[0], pair[1])
-    print("all files created")
 
-    print("creating links...")
     for i in range(len(symlinks)):
-        if i % 100 == 0:
-            print("creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(
-                int(float(i) / float(len(symlinks)) * 100)) + "%")
+        if i % report_interval == 0:
+            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+        done += 1
+
         pair = symlinks[i]
         real_make_link(pair[0], pair[1])
-    print("all links created")
 
 
 def real_make_link(dest, src):
@@ -179,7 +182,7 @@ class Room(object):
     def get_dir(self, env):
         return self.level.base_dir + "/" + str(self.x).zfill(4) + "_" + str(self.y).zfill(4) + get_env_str(env)
 
-    def render_basic(self, env):
+    def render_basic(self, env, allow_generate_message=True):
         my_dir = self.get_dir(env)
         mymakedirs(my_dir)
 
@@ -207,7 +210,7 @@ class Room(object):
             if do_this_choice:
                 message = m
 
-        if message is None:
+        if message is None and allow_generate_message:
             message = "You see a dank dungeon room before you "
 
             if len(doors):
@@ -220,11 +223,12 @@ class Room(object):
 
                 message += "."
             else:
-                message += "with smooth walls on every side. How did you even get here?"
+                message += "with smooth walls on every side. How did you even get here!"
 
-        msg = [x for x in message.split('\n') if x]
-        for i in range(len(msg)):
-            create_file(my_dir + "/" + str(i).zfill(2) + "_" + msg[i])
+        if message:
+            msg = [x for x in message.split('\n') if x]
+            for i in range(len(msg)):
+                create_file(my_dir + "/" + str(i).zfill(2) + "_" + msg[i])
 
         for name, dest, env_change, env_required, use_change_full in self.choices:
             do_this_choice = True
@@ -266,21 +270,22 @@ class Room(object):
 
 
 class MessageRoom(Room):
-    def __init__(self, level, message, extra_id=None):
+    id = 1
+
+    def __init__(self, level, message):
         super(self.__class__, self).__init__(level, -1, -1, True, '#')
 
-        self.messages = [[message, {}]]
-        self.extraId = extra_id
+        if message:
+            self.messages = [[message, {}]]
+
+        self.id = MessageRoom.id
+        MessageRoom.id += 1
 
     def get_dir(self, env):
-        sha_1 = hashlib.sha1()
-        sha_1.update(self.messages[0][0].encode('utf-8'))
-        this_hash = sha_1.hexdigest() + str(self.extraId)
-
-        return self.level.base_dir + "/message_" + this_hash + get_env_str(env)
+        return self.level.base_dir + "/message_" + str(self.id) + get_env_str(env)
 
     def render(self, env):
-        self.render_basic(env)
+        self.render_basic(env, False)
 
 
 class Level(object):
@@ -317,13 +322,13 @@ class Level(object):
     def add_special_rooms(self, special_rooms):
         self.special_rooms.extend(special_rooms)
 
-    def message_room(self, message, extra_id=None):
-        r = MessageRoom(self, message, extra_id)
+    def message_room(self, message):
+        r = MessageRoom(self, message)
         self.add_special_rooms([r])
         return r
 
-    def death_room(self, message, extra_id=None):
-        r = self.message_room(message + "\nYou died.", extra_id)
+    def death_room(self, message):
+        r = self.message_room(message + "\nYou died.")
         r.choices.append(["Restart from beginning of the level", self.sym_to_room['@'], self.default_values, {}, True])
         return r
 
@@ -401,7 +406,7 @@ def get_l1(l2):
     # start room
     room = l.sym_to_room['@']
     message = "You wake up to find yourself spread on the floor inside a cold and horrible dungeon. There is a barred door to your back,\n"
-    message += " and a thin corridoor in front of you. A lit brazier guides the path ahead.\n"
+    message += " and a thin corridor in front of you. A lit brazier guides the path ahead.\n"
     message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
     message += " Warily, you pull yourself up onto your feet."
     room.messages.append([message, {}])
@@ -409,9 +414,11 @@ def get_l1(l2):
 
     # chasm room
     room = l.sym_to_room['y']
-    message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest. Could it be gold...\n"
+    message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest.\n"
+    message += "Could it be gold...\n"
     message += "You start towards the door, and just catch yourself before you fall right off the edge of a deep, dark precipice.\n"
-    message += "Between you and the North door, there's a huge crack in the rocky floor. It's about three metres wide, but you you reckon maybe you could jump it.\n"
+    message += "Between you and the North door, there's a huge crack in the rocky floor.\n"
+    message += "It's about three metres wide, but you you reckon maybe you could jump it.\n"
     message += "There are also doors on the other walls of the room, on this side of the crack."
     room.messages.append([message, {}])
 
@@ -426,7 +433,7 @@ def get_l1(l2):
 
     # puddle room
     room = l.sym_to_room['x']
-    message = "You rememeber from earlier that you saw a glint of gold through a doorway.\n"
+    message = "You remember from earlier that you saw a glint of gold through a doorway.\n"
     message += "Thinking about it, you realise you've walked around the chasm, and should be in the room you could see before.\n"
     message += "You walk over to the southern door to investigate, but find nothing but a puddle with a yellow gint of light reflecting off it.\n"
     message += "Good thing you didn't risk jumping that gap for a bleedin' puddle, you think to yourself.\n"
@@ -574,8 +581,7 @@ def get_l2():
     room = l.sym_to_room['c']
     message = "Light! You see a cave exit before you, with leaves and roots hanging across it.\n"
     message += "You've done it! You made it out of the dungeon!\n"
-    message += "REDACTED"
-    message += "REDACTED"
+    message += "Congratulations on escaping from the Dungeon of Directories!\n"
     room.messages.append([message, {}])
     room.suppress_directions = ['North', 'East', 'South', 'West']
     room.level_resources.append(["images_winner.jpg", "winner.jpg"])
@@ -589,13 +595,10 @@ def get_l2():
     hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
                 (True, False, False), (True, False, True), (True, True, False), (True, True, True)]
 
-    its = 0
-
     for playerHp in range(0, 8):
         for ogreHp in range(0, 8):
             for hasSword in [False, True]:
                 for hasShield in [False, True]:
-                    its += 1
 
                     player_bools = {"player_0": hp_table[playerHp][0], "player_1": hp_table[playerHp][1],
                                    "player_2": hp_table[playerHp][2]}
@@ -663,49 +666,56 @@ def get_l2():
                         death_message = "It's been a hard battle, with a worthy foe. Both you and the Ogre are near the end of your endurance.\n"
                         death_message += "In unison, you both attack, each one knocking the other to the ground. Your sight begins to fade.\n"
                         death_message += "Just as you slip away, you hear the last of the life gurgle out of the Ogre. At least you got the bastard too.\n"
-                        room.choices.append([attack_message, l.death_room(death_message, its), {}, required, False])
+                        room.choices.append([attack_message, l.death_room(death_message), {}, required, False])
                     elif ogre_next_hp > 0:
                         death_message = "You move in to attack, but you are slowed by your wounds. You fumble and miss, and the Ogre's great club comes crashing down on your head.\n"
                         death_message += "The world fades to black...\n"
-                        room.choices.append([attack_message, l.death_room(death_message, its), {}, required, False])
+                        room.choices.append([attack_message, l.death_room(death_message), {}, required, False])
                     else:
                         message = "The Ogre is on its last legs. It aims a sideways blow at your head, but you effortlessly deflect it with your shield.\n"
                         message += "You use the lunging momentum from the parry to swoop in under his guard, and slam your sword upwards into his head.\n"
                         message += "The great frame topples, and you just manage to prance out of the way before he lands on you.\n"
                         message += "You have other problems though, the roof is still caving in! You can see the exit not far from you behind the corpse of the Ogre.\n"
                         message += "You make a run for it and just get through before the whole ceiling falls in, barring the way back.\n"
-                        win_room = l.message_room(message, its)
+                        win_room = l.message_room(message)
                         win_room.choices.append(["Ok", after_ogre_room, {}, {}, False])
                         room.choices.append([attack_message, win_room, {}, required, False])
     return l
 
 
 def __main__():
-    print("cleaning up...")
-    if myexists(".game"):
-        myrmtree(".game")
-
-    if myexists("Start Playing"):
-        os.remove("Start Playing")
-    if myexists("Start Playing.lnk"):
-        os.remove("Start Playing.lnk")
-
-    print("cleanup done")
-
     print("generating lists...")
     l2 = get_l2()
     l1 = get_l1(l2)
+
+    instructions_room = l1.message_room(None)
+    instructions_room.level_resources.append(["images_instructions.png", "instructions.png"])
+    instructions_room.choices.append(["Start (Read instructions first!)", l1.sym_to_room['@'], {}, {}, False])
 
     l2.render()
     l1.render()
     print("generating lists done")
 
-    # set up a start point
-    start_room = l1.sym_to_room['@']
+    do_generate = True
+    do_generate = not myexists(".game/ready")
 
-    mysymlink(start_room.get_dir(start_room.level.default_values), "Start Playing")
+    if do_generate:
+        print("cleaning up...")
+        if myexists(".game"):
+            myrmtree(".game")
+        print("cleanup done")
 
-    finish_links()
+        finish_links()
+
+        if sys.platform == 'win32':
+            # windows magic to hide the folder
+            ctypes.windll.kernel32.SetFileAttributesW(".game", 2)
+
+        with open(".game/ready", "wb"):
+            pass
+
+    if sys.platform == 'win32':
+        subprocess.call(["explorer.exe", "Start playing.lnk"])
 
 
 if __name__ == "__main__":
