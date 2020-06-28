@@ -4,6 +4,8 @@ import hashlib
 import sys
 import subprocess
 
+sys.path.append(os.path.dirname(__file__))
+
 directions = [
     ('North', (0, -1)),
     ('East', (1, 0)),
@@ -399,8 +401,8 @@ def get_l1(l2):
 
     l = Level(".game/l1", l1_raw, variables)
 
-    for fn in os.listdir("images/l1/"):
-        with myopen("images/l1/" + fn, "rb") as f:
+    for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/images/l1/"):
+        with open(os.path.abspath(os.path.dirname(__file__)) + "/images/l1/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
     # start room
@@ -527,8 +529,8 @@ def get_l2():
     l.default_values["sword"] = False
     l.default_values["shield"] = False
 
-    for fn in os.listdir("images/l2/"):
-        with myopen("images/l2/" + fn, "rb") as f:
+    for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/images/l2/"):
+        with open(os.path.abspath(os.path.dirname(__file__)) + "/images/l2/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
     # start room
@@ -715,7 +717,7 @@ def __main__():
             pass
 
     if sys.platform == 'win32':
-        subprocess.call(["explorer.exe", "Start playing.lnk"])
+        subprocess.call(["explorer.exe", get_windows_path(instructions_room.get_dir(instructions_room.level.default_values))])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+assets\python\python.exe assets\game.py
