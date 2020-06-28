@@ -15,14 +15,17 @@ if sys.platform == 'win32':
     import ctypes
     from ctypes import wintypes
 
+
     def get_windows_path(path):
         # only works on relative paths, but hey, it's good enough for us
         return "\\\\?\\" + os.getcwd() + "\\" + path.replace("/", "\\")
 
+
     _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
     _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
     _GetShortPathNameW.restype = wintypes.DWORD
-    
+
+
     def get_short_path_name(long_name):
         """
         Gets the short path name of a given long path.
@@ -44,35 +47,39 @@ symlinks = []
 directories = []
 files = []
 
+
 def mysymlink(dest, src):
     symlinks.append((dest, src))
-    
-def finish_links():
 
+
+def finish_links():
     print("creating directories...")
     for i in range(len(directories)):
         if i % 100 == 0:
-            print("creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(int(float(i)/float(len(directories))*100)) + "%")
+            print("creating directories, " + str(i) + "/" + str(len(directories)) + " " + str(
+                int(float(i) / float(len(directories)) * 100)) + "%")
         path = directories[i]
         real_makedirs(path)
     print("all directories created")
-    
+
     print("creating files...")
     for i in range(len(files)):
         if i % 100 == 0:
-            print("creating files, " + str(i) + "/" + str(len(files)) + " " + str(int(float(i)/float(len(files))*100)) + "%")
+            print("creating files, " + str(i) + "/" + str(len(files)) + " " + str(
+                int(float(i) / float(len(files)) * 100)) + "%")
         pair = files[i]
         real_create_file(pair[0], pair[1])
     print("all files created")
-    
+
     print("creating links...")
     for i in range(len(symlinks)):
         if i % 100 == 0:
-            print("creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(int(float(i)/float(len(symlinks))*100)) + "%")
+            print("creating links, " + str(i) + "/" + str(len(symlinks)) + " " + str(
+                int(float(i) / float(len(symlinks)) * 100)) + "%")
         pair = symlinks[i]
         real_make_link(pair[0], pair[1])
     print("all links created")
-        
+
 
 def real_make_link(dest, src):
     if sys.platform == 'win32':
@@ -83,46 +90,53 @@ def real_make_link(dest, src):
     else:
         os.symlink(src, dest)
 
+
 def myopen(filename, mode):
-    if sys.platform == 'win32':  
+    if sys.platform == 'win32':
         return open(get_windows_path(filename), mode)
     return open(filename, mode)
-    
+
+
 def create_file(filename, data=None):
     files.append((filename, data))
-        
+
+
 def real_create_file(filename, data):
     with myopen(filename, "wb") as f:
         if data:
             if isinstance(data, str):
                 data = data.encode('utf-8')
             f.write(data)
-        
+
+
 def mymakedirs(path):
     directories.append(path)
-        
+
+
 def real_makedirs(path):
-    if sys.platform == 'win32': 
+    if sys.platform == 'win32':
         components = path.replace("\\", "/").split("/")
-        
+
         current = []
         for component in components:
             current.append(component)
             current_path = "\\\\?\\" + os.getcwd() + "\\" + ("\\".join(current))
-            
+
             if not os.path.exists(current_path):
                 os.mkdir(current_path)
     else:
         os.makedirs(path)
-        
+
+
 def myexists(path):
-    if sys.platform == 'win32':      
+    if sys.platform == 'win32':
         return os.path.exists(get_windows_path(path))
     else:
         return os.path.exists(path)
-        
+
+
 def myrmtree(path):
-    if sys.platform == 'win32':         
+    if sys.platform == 'win32':
         def process(_path):
             if os.path.isdir(_path):
                 for child in os.listdir(_path):
@@ -130,41 +144,13 @@ def myrmtree(path):
                 os.rmdir(_path)
             else:
                 os.remove(_path)
-            
+
         process(get_windows_path(path))
     else:
         shutil.rmtree(path)
-	
-
-def test():
-
-    path = 'a' * 200
-    mymakedirs(path)
-    mymakedirs(path + "/" + path)
-
-    create_file(path + "/" + path  + "/asd")
-        
-    mymakedirs(path + "/b")
 
 
-    target = path + "/" + path
-    origin = path + "/b"
-    linkName = "testLink"
-
-
-    mysymlink(target, origin + "/" + linkName)
-
-    #print "QQQ", os.path.isdir(get_windows_path(origin + "/" + linkName)), os.path.islink (get_windows_path(origin + "/" + linkName))
-    #myrmtree(origin + "/" + linkName)
-    
-    finish_links()
-
-    exit()
-
-#test()
-
-
-def getEnvStr(env):
+def get_env_str(env):
     s = ['']
 
     keys = list(env.keys())
@@ -184,50 +170,49 @@ class Room(object):
         self.symbol = symbol
 
         self.choices = []
-        self.suppressDirections = []
+        self.suppress_directions = []
 
         self.messages = []
 
-        self.levelResources = []
+        self.level_resources = []
 
-    def getDir(self, env):
-        return self.level.baseDir + "/" + str(self.x).zfill(4) + "_" + str(self.y).zfill(4) + getEnvStr(env)
+    def get_dir(self, env):
+        return self.level.base_dir + "/" + str(self.x).zfill(4) + "_" + str(self.y).zfill(4) + get_env_str(env)
 
-    def renderBasic(self, env):
-        myDir = self.getDir(env)
-        mymakedirs(myDir)
+    def render_basic(self, env):
+        my_dir = self.get_dir(env)
+        mymakedirs(my_dir)
 
         # create_file(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y))
 
         doors = []
 
-        for dirName, offset in directions:
+        for dir_name, offset in directions:
             newCoords = (self.x + offset[0], self.y + offset[1])
-            if newCoords[0] < self.level.w and newCoords[0] >= 0 and newCoords[1] < self.level.h and newCoords[1] >= 0:
-                toRoom = self.level.rooms[newCoords[1]][newCoords[0]]
+            if self.level.w > newCoords[0] >= 0 and self.level.h > newCoords[1] >= 0:
+                to_room = self.level.rooms[newCoords[1]][newCoords[0]]
 
-                if toRoom.passable:
-                    doors.append(dirName)
-
+                if to_room.passable:
+                    doors.append(dir_name)
 
         message = None
 
-        for m, envRequired in self.messages:
-            doThisChoice = True
-            for k in envRequired:
-                if envRequired[k] != env[k]:
-                    doThisChoice = False
+        for m, env_required in self.messages:
+            do_this_choice = True
+            for k in env_required:
+                if env_required[k] != env[k]:
+                    do_this_choice = False
                     break
-            
-            if doThisChoice:
+
+            if do_this_choice:
                 message = m
-        
-        if message == None:
+
+        if message is None:
             message = "You see a dank dungeon room before you "
 
             if len(doors):
                 message += "with " + ("doors" if len(doors) > 1 else "a door") + " exiting to the "
-               
+
                 if len(doors) == 1:
                     message += doors[0]
                 else:
@@ -237,82 +222,76 @@ class Room(object):
             else:
                 message += "with smooth walls on every side. How did you even get here?"
 
-        
         msg = [x for x in message.split('\n') if x]
         for i in range(len(msg)):
-            create_file(myDir + "/" + str(i).zfill(2) + "_" + msg[i])
+            create_file(my_dir + "/" + str(i).zfill(2) + "_" + msg[i])
 
-        for name, dest, envChange, envRequired, useChangeFull in self.choices:
-            doThisChoice = True
-            for k in envRequired:
-                if envRequired[k] != env[k]:
-                    doThisChoice = False
+        for name, dest, env_change, env_required, use_change_full in self.choices:
+            do_this_choice = True
+            for k in env_required:
+                if env_required[k] != env[k]:
+                    do_this_choice = False
                     break
-            
-            if not doThisChoice:
+
+            if not do_this_choice:
                 continue
-            
-            if useChangeFull:
-                choiceEnv = envChange
+
+            if use_change_full:
+                choice_env = env_change
             else:
-                choiceEnv = dict(env)
-                for k in envChange:
-                    choiceEnv[k] = envChange[k]
-            self.level.renderTeleport(name, self, dest, env, choiceEnv)
+                choice_env = dict(env)
+                for k in env_change:
+                    choice_env[k] = env_change[k]
+            self.level.render_teleport(name, self, dest, env, choice_env)
 
-        for r in self.levelResources:
-            self.level.renderResourceInRoom(self, r[0], r[1], env)
-
-
-
-
+        for r in self.level_resources:
+            self.level.render_resource_in_room(self, r[0], r[1], env)
 
     def render(self, env):
         if not self.passable:
             return
 
+        self.render_basic(env)
 
-        self.renderBasic(env)
-
-        for dirName, offset in directions:
-            if dirName in self.suppressDirections:
+        for dir_name, offset in directions:
+            if dir_name in self.suppress_directions:
                 continue
 
-            newCoords = (self.x + offset[0], self.y + offset[1])
-            if newCoords[0] < self.level.w and newCoords[0] >= 0 and newCoords[1] < self.level.h and newCoords[1] >= 0:
-                toRoom = self.level.rooms[newCoords[1]][newCoords[0]]
+            new_coords = (self.x + offset[0], self.y + offset[1])
+            if self.level.w > new_coords[0] >= 0 and self.level.h > new_coords[1] >= 0:
+                to_room = self.level.rooms[new_coords[1]][new_coords[0]]
 
-                if toRoom.passable:
-                    self.level.renderTeleport('Move ' + dirName, self, toRoom, env, env)
-        
- 
+                if to_room.passable:
+                    self.level.render_teleport('Move ' + dir_name, self, to_room, env, env)
+
+
 class MessageRoom(Room):
-    def __init__(self, level, message, extraId=None):
+    def __init__(self, level, message, extra_id=None):
         super(self.__class__, self).__init__(level, -1, -1, True, '#')
-        
-        self.messages = [[message, {}]]
-        self.extraId = extraId
 
-    def getDir(self, env):
+        self.messages = [[message, {}]]
+        self.extraId = extra_id
+
+    def get_dir(self, env):
         sha_1 = hashlib.sha1()
         sha_1.update(self.messages[0][0].encode('utf-8'))
-        thisHash = sha_1.hexdigest() + str(self.extraId)
-        
-        return self.level.baseDir + "/message_" + thisHash + getEnvStr(env)
+        this_hash = sha_1.hexdigest() + str(self.extraId)
+
+        return self.level.base_dir + "/message_" + this_hash + get_env_str(env)
 
     def render(self, env):
-        self.renderBasic(env)
+        self.render_basic(env)
 
-               
-             
 
 class Level(object):
-    def init_base(self, baseDir, w, h):
-        self.baseDir = baseDir
-        self.w = w
-        self.h = h
+    def __init__(self, base_dir, data_str, variables):
+        rows = data_str.split()
+
+        self.base_dir = base_dir
+        self.w = len(rows[0])
+        self.h = len(rows)
         self.rooms = []
-        self.specialRooms = []
+        self.special_rooms = []
         self.resources = []
 
         for y in range(self.h):
@@ -321,74 +300,68 @@ class Level(object):
                 row.append(Room(self, x, y, True, '*'))
             self.rooms.append(row)
 
-    def __init__(self, baseDir, dataStr, variables):
-        rows = dataStr.split()
-
-        self.init_base(baseDir, len(rows[0]), len(rows))
-
-        self.symToRoom = {}
+        self.sym_to_room = {}
 
         for y in range(self.h):
             for x in range(self.w):
                 passable = rows[y][x] != '.'
                 self.rooms[y][x] = Room(self, x, y, passable, rows[y][x])
-                
+
                 if self.rooms[y][x].symbol not in ['#', '.']:
-                    self.symToRoom[self.rooms[y][x].symbol] = self.rooms[y][x]
+                    self.sym_to_room[self.rooms[y][x].symbol] = self.rooms[y][x]
 
         self.variables = variables
 
-        self.defaultValues = {k: False for k in self.variables}
+        self.default_values = {k: False for k in self.variables}
 
-    def addSpecialRooms(self, specialRooms):
-        self.specialRooms.extend(specialRooms)
+    def add_special_rooms(self, special_rooms):
+        self.special_rooms.extend(special_rooms)
 
-    def messageRoom(self, message, extraId=None):
-        r = MessageRoom(self, message, extraId)
-        self.addSpecialRooms([r])
+    def message_room(self, message, extra_id=None):
+        r = MessageRoom(self, message, extra_id)
+        self.add_special_rooms([r])
         return r
 
-    def deathRoom(self, message, extraId=None):
-        r = self.messageRoom(message + "\nYou died.", extraId)
-        r.choices.append(["Restart from beginning of the level", self.symToRoom['@'], self.defaultValues, {}, True])
+    def death_room(self, message, extra_id=None):
+        r = self.message_room(message + "\nYou died.", extra_id)
+        r.choices.append(["Restart from beginning of the level", self.sym_to_room['@'], self.default_values, {}, True])
         return r
-
 
     def render(self):
-        mymakedirs(self.baseDir)
+        mymakedirs(self.base_dir)
 
         def perm(variables, vs, i, f):
             if i == len(variables):
                 f(vs)
                 return
-           
-            vs[variables[i]] = False
-            perm(variables, vs, i+1, f)
-            vs[variables[i]] = True
-            perm(variables, vs, i+1, f)
 
-        def renderOnePerm(env):
+            vs[variables[i]] = False
+            perm(variables, vs, i + 1, f)
+            vs[variables[i]] = True
+            perm(variables, vs, i + 1, f)
+
+        def render_one_perm(env):
             for y in range(self.h):
                 for x in range(self.w):
                     self.rooms[y][x].render(env)
 
-            for k in self.specialRooms:
+            for k in self.special_rooms:
                 k.render(env)
 
-        perm(self.variables, {}, 0, renderOnePerm)
+        perm(self.variables, {}, 0, render_one_perm)
 
         for r in self.resources:
-            create_file(self.baseDir + "/" + r[0], r[1])
+            create_file(self.base_dir + "/" + r[0], r[1])
 
-    def renderTeleport(self, linkName, fromRoom, toRoom, fromEnv, toEnv):
-        mysymlink(toRoom.getDir(toEnv), fromRoom.getDir(fromEnv) + "/" + linkName)
+    def render_teleport(self, link_name, from_room, to_room, from_env, to_env):
+        mysymlink(to_room.get_dir(to_env), from_room.get_dir(from_env) + "/" + link_name)
 
-    def getMap(self, hilightPos = None):
+    def get_map(self, highlight_pos=None):
         lines = []
         for y in range(self.h):
             line = []
             for x in range(self.w):
-                if hilightPos != None and hilightPos[0] == x and hilightPos[1] == y:
+                if highlight_pos is not None and highlight_pos[0] == x and highlight_pos[1] == y:
                     line.append('@')
                 elif self.rooms[y][x].passable:
                     line.append('#')
@@ -398,9 +371,9 @@ class Level(object):
             lines.append("".join(line))
 
         return "\n".join(lines)
-    
-    def renderResourceInRoom(self, room, resourceName, nameInRoom, env):
-        mysymlink(self.baseDir + "/" + resourceName, room.getDir(env) + "/" + nameInRoom)
+
+    def render_resource_in_room(self, room, resource_name, name_in_room, env):
+        mysymlink(self.base_dir + "/" + resource_name, room.get_dir(env) + "/" + name_in_room)
 
 
 def get_l1(l2):
@@ -425,108 +398,107 @@ def get_l1(l2):
         with myopen("images/l1/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
-
     # start room
-    room = l.symToRoom['@'] 
+    room = l.sym_to_room['@']
     message = "You wake up to find yourself spread on the floor inside a cold and horrible dungeon. There is a barred door to your back,\n"
     message += " and a thin corridoor in front of you. A lit brazier guides the path ahead.\n"
     message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
     message += " Warily, you pull yourself up onto your feet."
     room.messages.append([message, {}])
-    room.levelResources.append(["images_dungeon.jpg", "dungeon.jpg"])
-    
+    room.level_resources.append(["images_dungeon.jpg", "dungeon.jpg"])
 
     # chasm room
-    room = l.symToRoom['y']
+    room = l.sym_to_room['y']
     message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest. Could it be gold...\n"
     message += "You start towards the door, and just catch yourself before you fall right off the edge of a deep, dark precipice.\n"
     message += "Between you and the North door, there's a huge crack in the rocky floor. It's about three metres wide, but you you reckon maybe you could jump it.\n"
     message += "There are also doors on the other walls of the room, on this side of the crack."
     room.messages.append([message, {}])
 
-    deathMessage = "You take a few steps back, run up, and leap towards the door. At the midway point you see over a lump in the door frame,\n"
-    deathMessage += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
-    deathMessage += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
-    deathRoom = l.deathRoom(deathMessage)
-    deathRoom.levelResources.append(["images_chasm.png", "chasm.png"])
+    death_message = "You take a few steps back, run up, and leap towards the door. At the midway point you see over a lump in the door frame,\n"
+    death_message += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
+    death_message += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
+    death_room = l.death_room(death_message)
+    death_room.level_resources.append(["images_chasm.png", "chasm.png"])
 
-    room.suppressDirections = ['North']
-    room.choices.append(['Move North (Try to jump the gap)', deathRoom, {}, {}, False])
+    room.suppress_directions = ['North']
+    room.choices.append(['Move North (Try to jump the gap)', death_room, {}, {}, False])
 
     # puddle room
-    room = l.symToRoom['x']
+    room = l.sym_to_room['x']
     message = "You rememeber from earlier that you saw a glint of gold through a doorway.\n"
     message += "Thinking about it, you realise you've walked around the chasm, and should be in the room you could see before.\n"
     message += "You walk over to the southern door to investigate, but find nothing but a puddle with a yellow gint of light reflecting off it.\n"
     message += "Good thing you didn't risk jumping that gap for a bleedin' puddle, you think to yourself.\n"
     room.messages.append([message, {}])
 
-    deathMessage = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
-    deathRoom = l.deathRoom(deathMessage)
-    deathRoom.levelResources.append(["images_cliff_walk.jpg", "you.jpg"])
+    death_message = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
+    death_room = l.death_room(death_message)
+    death_room.level_resources.append(["images_cliff_walk.jpg", "you.jpg"])
 
-    room.suppressDirections = ['South']
-    room.choices.append(['Move South', deathRoom, {}, {}, False])
-    
+    room.suppress_directions = ['South']
+    room.choices.append(['Move South', death_room, {}, {}, False])
+
     # map room
-    room = l.symToRoom['m']
-    
-    mapStr = "You pick up the map and have a look.\n"
-    mapStr += "You realise that the map seems to show open areas with a # symbol, and the surrounding rock with .\n"
-    mapStr += "You quickly work out your own position, and note it down with an @ symbol.\n"
-    mapStr += "You think to yourself that this is a good system, and you should probably use it to keep track of your position,\n"
-    mapStr += "and maybe use it to make new maps for yourself if you leave the mapped area (or use a piece of paper, which might be easier).\n\n\n"
-    mapStr += l.getMap([room.x, room.y])
-    l.resources.append(["map.txt", mapStr])
+    room = l.sym_to_room['m']
+
+    map_str = "You pick up the map and have a look.\n"
+    map_str += "You realise that the map seems to show open areas with a # symbol, and the surrounding rock with .\n"
+    map_str += "You quickly work out your own position, and note it down with an @ symbol.\n"
+    map_str += "You think to yourself that this is a good system, and you should probably use it to keep track of your position,\n"
+    map_str += "and maybe use it to make new maps for yourself if you leave the mapped area (or use a piece of paper, which might be easier).\n\n\n"
+    map_str += l.get_map([room.x, room.y])
+    l.resources.append(["map.txt", map_str])
 
     message = "As you enter the room, your foot brushes a scroll on the floor.\n"
     message += "You bend to pick it up and have a look. You realise that it's a map! This will come in handy.\n"
     room.messages.append([message, {}])
 
-    room.levelResources.append(["map.txt", "map.txt"])
-    
+    room.level_resources.append(["map.txt", "map.txt"])
+
     # fork room
-    room = l.symToRoom['f']
+    room = l.sym_to_room['f']
     message = "You see a fork in the path ahead of you. A foul smell wafts towards your nostrils from the East passage.\n"
     message += "From the West passage, you think you can feel a slight breeze of fresh air."
     room.messages.append([message, {}])
 
     # key room
-    room = l.symToRoom['k']
+    room = l.sym_to_room['k']
 
     room.choices.append(['Pick up the key', room, {"hasKey": True}, {"hasKey": False}, False])
     message = "As you enter the room, you notice a glint of something shiny poking through the dirt under your boot.\n"
     message += "You bend to examine it. It's a key! That might come in handy."
     room.messages.append([message, {"hasKey": False}])
-    
-    room.levelResources.append(["images_key.png", "key.png"])
-   
+
+    room.level_resources.append(["images_key.png", "key.png"])
+
     # door room 
-    room = l.symToRoom['d']
+    room = l.sym_to_room['d']
 
     message = "Set deep into the wall on the North end of the room, is a large and imposing door.\n"
     message += "It is made of thick hardwood, and revolves on a masive iron hinge.\n"
     message += "Seeping around the edges is a slight breeze of some fresher air."
     room.messages.append([message, {}])
 
-    cantOpenDoorRoom = l.messageRoom("You try and try, but the door just won't budge. It must be locked.")
-    cantOpenDoorRoom.choices.append(["Ok", room, {}, {}, False])
+    cant_open_door_room = l.message_room("You try and try, but the door just won't budge. It must be locked.")
+    cant_open_door_room.choices.append(["Ok", room, {}, {}, False])
 
-    openDoorMessage = "You push hard at the door, but it doesn't budge an inch.\n"
-    openDoorMessage += "You notice a small keyhole on the right hand side of the door.\n"
-    openDoorMessage += "On a whim, you slot the key you picked up earlier into the keyhole, and twist hard. It turns!\n"
-    openDoorMessage += "You push again at the door, and it slides back. A rush of fresher air hits your face.\n"
-    openDoorMessage += "The door reveals a short corridoor leading to a spiral staircase, heading up towards the surface."
-    goToL2Room = l.messageRoom(openDoorMessage)
-    goToL2Room.choices.append(["Climb the staircase", l2.symToRoom['@'], l2.defaultValues, {}, True])
-    goToL2Room.levelResources.append(["images_stairs.jpg", "stairs.jpg"])
+    open_door_message = "You push hard at the door, but it doesn't budge an inch.\n"
+    open_door_message += "You notice a small keyhole on the right hand side of the door.\n"
+    open_door_message += "On a whim, you slot the key you picked up earlier into the keyhole, and twist hard. It turns!\n"
+    open_door_message += "You push again at the door, and it slides back. A rush of fresher air hits your face.\n"
+    open_door_message += "The door reveals a short corridoor leading to a spiral staircase, heading up towards the surface."
+    go_to_l2_room = l.message_room(open_door_message)
+    go_to_l2_room.choices.append(["Climb the staircase", l2.sym_to_room['@'], l2.default_values, {}, True])
+    go_to_l2_room.level_resources.append(["images_stairs.jpg", "stairs.jpg"])
 
-    room.choices.append(['Go through the door', goToL2Room, {}, {"hasKey": True}, False])
-    room.choices.append(['Go through the door', cantOpenDoorRoom, {}, {"hasKey": False}, False])
-    
-    room.levelResources.append(["images_door.jpg", "door.jpg"])
+    room.choices.append(['Go through the door', go_to_l2_room, {}, {"hasKey": True}, False])
+    room.choices.append(['Go through the door', cant_open_door_room, {}, {"hasKey": False}, False])
+
+    room.level_resources.append(["images_door.jpg", "door.jpg"])
 
     return l
+
 
 def get_l2():
     l2_raw = """
@@ -544,115 +516,117 @@ def get_l2():
     variables = ["ogre_0", "ogre_1", "ogre_2", "player_0", "player_1", "player_2", "sword", "shield"]
 
     l = Level(".game/l2", l2_raw, variables)
-    l.defaultValues = {k: True for k in variables}
-    l.defaultValues["sword"] = False
-    l.defaultValues["shield"] = False
+    l.default_values = {k: True for k in variables}
+    l.default_values["sword"] = False
+    l.default_values["shield"] = False
 
     for fn in os.listdir("images/l2/"):
         with myopen("images/l2/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
-    
     # start room
-    room = l.symToRoom['@']
-    
-    startMessage = "Just as you step off the stairs onto the new level, the staircase begins to grumble and crunch behind you.\n"
-    startMessage += "It collapses into a pile of rubble, leaving just a deep hole.\n"
-    startMessage += "You won't be going back that way.\n" 
-    startMessage += "You take a look at your map, and realise that you've left the covered area. You'll need to start making your own.\n"
-    room.messages.append([startMessage, {}])
+    room = l.sym_to_room['@']
+
+    start_message = "Just as you step off the stairs onto the new level, the staircase begins to grumble and crunch behind you.\n"
+    start_message += "It collapses into a pile of rubble, leaving just a deep hole.\n"
+    start_message += "You won't be going back that way.\n"
+    start_message += "You take a look at your map, and realise that you've left the covered area. You'll need to start making your own.\n"
+    room.messages.append([start_message, {}])
 
     # fork room
-    room = l.symToRoom['f']
+    room = l.sym_to_room['f']
 
     message = "You come to a three way fork in the tunnel.\n"
     message += "You think you see a spark of light down the Northern tunnel, maybe it's the way out."
     room.messages.append([message, {}])
 
     # sword room
-    room = l.symToRoom['s']
-    swordMessage = "As you enter, you notice racks and targets scattered about the room.\n"
-    swordMessage += "It appears to be some sort of armoury, but it was abandoned a long time ago and is in pretty bad shape.\n"
-    swordMessage += "In one of the corners, something catches your eye. It's a sword! And it's in decent condition too."
-    room.messages.append([swordMessage, {"sword": False}])
+    room = l.sym_to_room['s']
+    sword_message = "As you enter, you notice racks and targets scattered about the room.\n"
+    sword_message += "It appears to be some sort of armoury, but it was abandoned a long time ago and is in pretty bad shape.\n"
+    sword_message += "In one of the corners, something catches your eye. It's a sword! And it's in decent condition too."
+    room.messages.append([sword_message, {"sword": False}])
 
     room.choices.append(["Pick up the sword", room, {"sword": True}, {"sword": False}, False])
 
     # shield room
-    room = l.symToRoom['h']
-    shieldMessage = "There is a skeleton in the far corner of the room.\n"
-    shieldMessage += "Clutched in its bony fingers is a wide wooden shield.\n"
-    room.messages.append([shieldMessage, {"shield": False}])
+    room = l.sym_to_room['h']
+    shield_message = "There is a skeleton in the far corner of the room.\n"
+    shield_message += "Clutched in its bony fingers is a wide wooden shield.\n"
+    room.messages.append([shield_message, {"shield": False}])
 
     room.choices.append(["Pick up the shield", room, {"shield": True}, {"shield": False}, False])
 
     # after ogre room
-    afterOgreRoom = l.symToRoom['a']
-    afterOgreRoom.suppressDirections = ['South']
+    after_ogre_room = l.sym_to_room['a']
+    after_ogre_room.suppress_directions = ['South']
 
-    afterOgreRoom.messages.append(["You are in a thin tunnel, you can see a glimmer of light at the far end.", {}])
+    after_ogre_room.messages.append(["You are in a thin tunnel, you can see a glimmer of light at the far end.", {}])
 
-    # exit corridoor 1
-    room = l.symToRoom['b']
+    # exit corridor 1
+    room = l.sym_to_room['b']
     message = "The light is getting brighter! You must have found a tunnel to the surface!.\n"
     room.messages.append([message, {}])
-    
-    room.levelResources.append(["images_tunnel.jpg", "tunnel.jpg"])
 
-    # exit corridoor 2
-    room = l.symToRoom['c']
+    room.level_resources.append(["images_tunnel.jpg", "tunnel.jpg"])
+
+    # exit corridor 2
+    room = l.sym_to_room['c']
     message = "Light! You see a cave exit before you, with leaves and roots hanging across it.\n"
     message += "You've done it! You made it out of the dungeon!\n"
     message += "REDACTED"
     message += "REDACTED"
     room.messages.append([message, {}])
-    room.suppressDirections = ['North', 'East', 'South', 'West']
-    room.levelResources.append(["images_winner.jpg", "winner.jpg"])
-
+    room.suppress_directions = ['North', 'East', 'South', 'West']
+    room.level_resources.append(["images_winner.jpg", "winner.jpg"])
 
     # ogre room
-    room = l.symToRoom['o']
+    room = l.sym_to_room['o']
 
-    room.suppressDirections = ['South', 'East', 'North', 'West']
-    room.levelResources.append(["images_ogre.jpg", "ogre.jpg"])
+    room.suppress_directions = ['South', 'East', 'North', 'West']
+    room.level_resources.append(["images_ogre.jpg", "ogre.jpg"])
 
-    hpTable = [(False,False,False), (False,False,True), (False,True,False), (False,True,True), (True,False,False), (True,False,True), (True,True,False), (True,True,True)]
-    
+    hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
+                (True, False, False), (True, False, True), (True, True, False), (True, True, True)]
+
     its = 0
 
     for playerHp in range(0, 8):
         for ogreHp in range(0, 8):
             for hasSword in [False, True]:
                 for hasShield in [False, True]:
-                    its+=1
+                    its += 1
 
-                    playerBools = {"player_0": hpTable[playerHp][0], "player_1": hpTable[playerHp][1], "player_2": hpTable[playerHp][2]}
-                    ogreBools = {"ogre_0": hpTable[ogreHp][0], "ogre_1": hpTable[ogreHp][1], "ogre_2": hpTable[ogreHp][2]}
-                    
-                    playerDamage = 1
-                    ogreDamage = 3
+                    player_bools = {"player_0": hp_table[playerHp][0], "player_1": hp_table[playerHp][1],
+                                   "player_2": hp_table[playerHp][2]}
+                    ogre_bools = {"ogre_0": hp_table[ogreHp][0], "ogre_1": hp_table[ogreHp][1],
+                                 "ogre_2": hp_table[ogreHp][2]}
+
+                    player_damage = 1
+                    ogre_damage = 3
 
                     if hasSword:
-                        playerDamage = 2
+                        player_damage = 2
                     if hasShield:
-                        ogreDamage = 1
+                        ogre_damage = 1
 
-                    playerNextHp = max(playerHp - ogreDamage, 0)
-                    ogreNextHp = max(ogreHp - playerDamage, 0)
+                    player_next_hp = max(playerHp - ogre_damage, 0)
+                    ogre_next_hp = max(ogreHp - player_damage, 0)
 
-                    playerNextBools = {"player_0": hpTable[playerNextHp][0], "player_1": hpTable[playerNextHp][1], "player_2": hpTable[playerNextHp][2]}
-                    ogreNextBools = {"ogre_0": hpTable[ogreNextHp][0], "ogre_1": hpTable[ogreNextHp][1], "ogre_2": hpTable[ogreNextHp][2]}
-                    
+                    player_next_bools = {"player_0": hp_table[player_next_hp][0], "player_1": hp_table[player_next_hp][1],
+                                       "player_2": hp_table[player_next_hp][2]}
+                    ogre_next_bools = {"ogre_0": hp_table[ogre_next_hp][0], "ogre_1": hp_table[ogre_next_hp][1],
+                                     "ogre_2": hp_table[ogre_next_hp][2]}
 
                     required = {"sword": hasSword, "shield": hasShield}
-                    required.update(playerBools)
-                    required.update(ogreBools)
+                    required.update(player_bools)
+                    required.update(ogre_bools)
 
-                    def getHpStr(hp):
-                        return str(int((hp/7.0) * 100))
+                    def get_hp_str(hp):
+                        return str(int((hp / 7.0) * 100))
 
                     message = ""
-                    if playerHp == 7 and ogreHp == 7: # The player has just entered the ogre room
+                    if playerHp == 7 and ogreHp == 7:  # The player has just entered the ogre room
                         message += "As you step into the room, you hear a rumble from overhead.\n"
                         message += "A crack appears in the ceiling, followed by another, and another.\n"
                         message += "Suddenly, the whole ceiling caves in, and a three metre tall hulking great big Ogre smashes through, wielding a club the size of a tree trunk.\n"
@@ -663,46 +637,46 @@ def get_l2():
                         else:
                             message += "You jump up and slug the Ogre forcefully in the face"
 
-                        message += ", dealing " + getHpStr(playerDamage) + " damage.\n"
-                        
+                        message += ", dealing " + get_hp_str(player_damage) + " damage.\n"
+
                         message += "The Ogre swings his club at your chest"
 
                         if hasShield:
                             message += ", but you block with your shield. The blow still hurts quite a bit though"
 
-                        message += ", dealing " + getHpStr(ogreDamage) + " damage.\n"
+                        message += ", dealing " + get_hp_str(ogre_damage) + " damage.\n"
 
-                    message += "Your HP; " + getHpStr(playerHp) + ", Ogre's HP; " + getHpStr(ogreHp)
+                    message += "Your HP; " + get_hp_str(playerHp) + ", Ogre's HP; " + get_hp_str(ogreHp)
                     room.messages.append([message, required])
 
-                    attackMessage = "Attack the Ogre"
+                    attack_message = "Attack the Ogre"
 
                     if hasSword:
-                        attackMessage += " with your sword"
+                        attack_message += " with your sword"
 
-                    if playerNextHp > 0 and ogreNextHp > 0:
-                        nextState = {}
-                        nextState.update(playerNextBools)
-                        nextState.update(ogreNextBools)
-                        room.choices.append([attackMessage, room, nextState, required, False])
-                    elif playerNextHp == 0 and ogreNextHp == 0:
-                        deathMessage = "It's been a hard battle, with a worthy foe. Both you and the Ogre are near the end of your endurance.\n"
-                        deathMessage += "In unison, you both attack, each one knocking the other to the ground. Your sight begins to fade.\n"
-                        deathMessage += "Just as you slip away, you hear the last of the life gurgle out of the Ogre. At least you got the bastard too.\n"
-                        room.choices.append([attackMessage, l.deathRoom(deathMessage, its), {}, required, False])
-                    elif ogreNextHp > 0:
-                        deathMessage = "You move in to attack, but you are slowed by your wounds. You fumble and miss, and the Ogre's great club comes crashing down on your head.\n"
-                        deathMessage += "The world fades to black...\n"
-                        room.choices.append([attackMessage, l.deathRoom(deathMessage, its), {}, required, False])
+                    if player_next_hp > 0 and ogre_next_hp > 0:
+                        next_state = {}
+                        next_state.update(player_next_bools)
+                        next_state.update(ogre_next_bools)
+                        room.choices.append([attack_message, room, next_state, required, False])
+                    elif player_next_hp == 0 and ogre_next_hp == 0:
+                        death_message = "It's been a hard battle, with a worthy foe. Both you and the Ogre are near the end of your endurance.\n"
+                        death_message += "In unison, you both attack, each one knocking the other to the ground. Your sight begins to fade.\n"
+                        death_message += "Just as you slip away, you hear the last of the life gurgle out of the Ogre. At least you got the bastard too.\n"
+                        room.choices.append([attack_message, l.death_room(death_message, its), {}, required, False])
+                    elif ogre_next_hp > 0:
+                        death_message = "You move in to attack, but you are slowed by your wounds. You fumble and miss, and the Ogre's great club comes crashing down on your head.\n"
+                        death_message += "The world fades to black...\n"
+                        room.choices.append([attack_message, l.death_room(death_message, its), {}, required, False])
                     else:
                         message = "The Ogre is on its last legs. It aims a sideways blow at your head, but you effortlessly deflect it with your shield.\n"
                         message += "You use the lunging momentum from the parry to swoop in under his guard, and slam your sword upwards into his head.\n"
                         message += "The great frame topples, and you just manage to prance out of the way before he lands on you.\n"
                         message += "You have other problems though, the roof is still caving in! You can see the exit not far from you behind the corpse of the Ogre.\n"
                         message += "You make a run for it and just get through before the whole ceiling falls in, barring the way back.\n"
-                        winRoom = l.messageRoom(message, its)
-                        winRoom.choices.append(["Ok", afterOgreRoom, {}, {}, False])
-                        room.choices.append([attackMessage, winRoom, {}, required, False])
+                        win_room = l.message_room(message, its)
+                        win_room.choices.append(["Ok", after_ogre_room, {}, {}, False])
+                        room.choices.append([attack_message, win_room, {}, required, False])
     return l
 
 
@@ -710,12 +684,12 @@ def __main__():
     print("cleaning up...")
     if myexists(".game"):
         myrmtree(".game")
-        
+
     if myexists("Start Playing"):
         os.remove("Start Playing")
     if myexists("Start Playing.lnk"):
         os.remove("Start Playing.lnk")
-        
+
     print("cleanup done")
 
     print("generating lists...")
@@ -727,11 +701,12 @@ def __main__():
     print("generating lists done")
 
     # set up a start point
-    startRoom = l1.symToRoom['@'] 
+    start_room = l1.sym_to_room['@']
 
-    mysymlink(startRoom.getDir(startRoom.level.defaultValues), "Start Playing")
+    mysymlink(start_room.get_dir(start_room.level.default_values), "Start Playing")
 
     finish_links()
-    
+
+
 if __name__ == "__main__":
     __main__()
