@@ -61,8 +61,8 @@ def finish_links():
     for i in range(len(files)):
         if i % 100 == 0:
             print("creating files, " + str(i) + "/" + str(len(files)) + " " + str(int(float(i)/float(len(files))*100)) + "%")
-        path = files[i]
-        real_create_file(path)
+        pair = files[i]
+        real_create_file(pair[0], pair[1])
     print("all files created")
     
     print("creating links...")
@@ -88,12 +88,15 @@ def myopen(filename, mode):
         return open(get_windows_path(filename), mode)
     return open(filename, mode)
     
-def create_file(filename):
-    files.append(filename)
+def create_file(filename, data=None):
+    files.append((filename, data))
         
-def real_create_file(filename):
-    with myopen(filename, "wb"):
-        pass
+def real_create_file(filename, data):
+    with myopen(filename, "wb") as f:
+        if data:
+            if isinstance(data, str):
+                data = data.encode('utf-8')
+            f.write(data)
         
 def mymakedirs(path):
     directories.append(path)
@@ -194,7 +197,7 @@ class Room(object):
         myDir = self.getDir(env)
         mymakedirs(myDir)
 
-        create_file(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y))
+        # create_file(myDir + "/DEBUG_THIS_IS_ROOM_" + str(self.x) + "_" + str(self.y))
 
         doors = []
 
@@ -374,9 +377,8 @@ class Level(object):
 
         perm(self.variables, {}, 0, renderOnePerm)
 
-        #for r in self.resources:
-        #    with myopen(self.baseDir + "/" + r[0], "wb") as f:
-        #        f.write(r[1])
+        for r in self.resources:
+            create_file(self.baseDir + "/" + r[0], r[1])
 
     def renderTeleport(self, linkName, fromRoom, toRoom, fromEnv, toEnv):
         mysymlink(toRoom.getDir(toEnv), fromRoom.getDir(fromEnv) + "/" + linkName)
