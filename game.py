@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import shutil
 import hashlib
@@ -93,7 +95,7 @@ def real_make_link(dest, src):
 
         swl.create_lnk(dest, src)
     else:
-        os.symlink(src, dest)
+        os.symlink(os.path.abspath(dest), src)
 
 
 def myopen(filename, mode):
@@ -718,6 +720,8 @@ def __main__():
 
     if sys.platform == 'win32':
         subprocess.call(["explorer.exe", get_windows_path(instructions_room.get_dir(instructions_room.level.default_values))])
+    elif sys.platform.startswith('linux'):
+        subprocess.Popen(["xdg-open", instructions_room.get_dir(instructions_room.level.default_values)], close_fds=True)
 
 
 if __name__ == "__main__":
