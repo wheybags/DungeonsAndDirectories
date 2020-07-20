@@ -412,7 +412,7 @@ def get_l1(l2):
     message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
     message += " Warily, you pull yourself up onto your feet."
     room.messages.append([message, {}])
-    room.level_resources.append(["images_dungeon.jpg", "dungeon.jpg"])
+    room.level_resources.append(["images_dungeon.gif", "dungeon.gif"])
 
     # chasm room
     room = l.sym_to_room['y']
