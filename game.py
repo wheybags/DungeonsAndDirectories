@@ -430,7 +430,7 @@ def get_l1(l2):
     death_message += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
     death_message += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
     death_room = l.death_room(death_message)
-    death_room.level_resources.append(["images_chasm.png", "chasm.png"])
+    death_room.level_resources.append(["images_chasm.gif", "chasm.gif"])
 
     room.suppress_directions = ['North']
     room.choices.append(['Move North (Try to jump the gap)', death_room, {}, {}, False])
