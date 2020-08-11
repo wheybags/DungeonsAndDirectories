@@ -481,7 +481,7 @@ def get_l1(l2):
     message += "You bend to examine it. It's a key! That might come in handy."
     room.messages.append([message, {"hasKey": False}])
 
-    room.level_resources.append(["images_key.png", "key.png"])
+    room.level_resources.append(["images_key.gif", "key.gif"])
 
     # door room 
     room = l.sym_to_room['d']
