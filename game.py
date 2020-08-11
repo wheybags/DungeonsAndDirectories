@@ -445,7 +445,7 @@ def get_l1(l2):
 
     death_message = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
     death_room = l.death_room(death_message)
-    death_room.level_resources.append(["images_cliff_walk.jpg", "you.jpg"])
+    death_room.level_resources.append(["images_cliff_walk.png", "you.png"])
 
     room.suppress_directions = ['South']
     room.choices.append(['Move South', death_room, {}, {}, False])
