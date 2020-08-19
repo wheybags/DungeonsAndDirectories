@@ -506,7 +506,7 @@ def get_l1(l2):
     room.choices.append(['Go through the door', go_to_l2_room, {}, {"hasKey": True}, False])
     room.choices.append(['Go through the door', cant_open_door_room, {}, {"hasKey": False}, False])
 
-    room.level_resources.append(["images_door.jpg", "door.jpg"])
+    room.level_resources.append(["images_door.png", "door.png"])
 
     return l
 
