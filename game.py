@@ -501,7 +501,6 @@ def get_l1(l2):
     open_door_message += "The door reveals a short corridoor leading to a spiral staircase, heading up towards the surface."
     go_to_l2_room = l.message_room(open_door_message)
     go_to_l2_room.choices.append(["Climb the staircase", l2.sym_to_room['@'], l2.default_values, {}, True])
-    go_to_l2_room.level_resources.append(["images_stairs.jpg", "stairs.jpg"])
 
     room.choices.append(['Go through the door', go_to_l2_room, {}, {"hasKey": True}, False])
     room.choices.append(['Go through the door', cant_open_door_room, {}, {"hasKey": False}, False])
