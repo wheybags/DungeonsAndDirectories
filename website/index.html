@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="utf-8">
+    <head>
+        <style>
+            * {
+                font-family: Conv_fixedsys;
+            }
+
+
+            body {
+                margin: 0;
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+
+                background-image: url("./gfx/bricks_dark.gif");
+            }
+
+            #centre_main {
+                width: 400px;
+
+                position: absolute;
+                padding-bottom: 60px;
+            }
+
+            #centre_inner {
+                background-image: url("./gfx/web_middle.gif");
+                color: white;
+                padding-left: 40px;
+                padding-right: 40px;
+            }
+
+            a:link, a:visited {
+              background-color: white;
+              color: black;
+            }
+        </style>
+
+        <link href="./fonts.css" rel="stylesheet" type="text/css">
+
+        <script type="text/javascript">
+            var position_image = function()
+            {
+                var elem = document.getElementById("centre_main");
+
+                var width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+
+
+
+                var left = width / 2 - elem.clientWidth / 2;
+                left = Math.round(left / 32) * 32;
+
+                console.log("SETTING " + left + " - " + left/32.0);
+                elem.style.left = left + "px";
+            };
+
+            window.onload = position_image;
+            window.onresize = position_image;
+        </script>
+
+        <link rel="icon" type="image/ico" href="./gfx/favicon.ico">
+
+        <!-- Matomo -->
+        <script type="text/javascript">
+          var _paq = window._paq || [];
+          /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          (function() {
+            var u="//matomo.wheybags.com/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '2']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <!-- End Matomo Code -->
+    </head>
+
+    <body>
+        <div id="centre_main">
+            <img src="./gfx/web_bg.gif" style="display:block;">
+            <div id="centre_inner">
+                <br>
+                Dungeons and Directories is a short text adventure game that you play in your file browser.
+                <br>
+                <br>
+                <a href="">Download</a>
+
+                <br>
+                <br>
+                <a href="https://github.com/wheybags/dungeons_and_directories">Github</a>
+                <br>
+                <a href="https://wheybags.com/blah">How was it made?</a>
+
+
+                <br>
+                <br>
+                Made by Tom Mason // <a href="https://wheybags.com">wheybags.com</a>
+                <br>
+                <br>
+            </div>
+            <img src="./gfx/web_bottom.gif" style="display:block;">
+        </div>
+    </body>
+</html>
