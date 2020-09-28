@@ -16,7 +16,7 @@ $(eval $(call gen_aseprite_export,images/l1/dungeon.gif,source_images/dungeon.as
 $(eval $(call gen_aseprite_export,images/l1/key.gif,source_images/key.aseprite,6))
 
 # Level 2 
-$(eval $(call gen_aseprite_export,images/l2/ogre.png,source_images/ogre.aseprite,4))
+$(eval $(call gen_aseprite_export,images/l2/ogre.gif,source_images/ogre.aseprite,4))
 
 .DEFAULT_GOAL := all
 .PHONY: all
