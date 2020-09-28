@@ -593,7 +593,7 @@ def get_l2():
     room = l.sym_to_room['o']
 
     room.suppress_directions = ['South', 'East', 'North', 'West']
-    room.level_resources.append(["images_ogre.jpg", "ogre.jpg"])
+    room.level_resources.append(["images_ogre.png", "ogre.png"])
 
     hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
                 (True, False, False), (True, False, True), (True, True, False), (True, True, True)]
@@ -700,7 +700,7 @@ def __main__():
     print("generating lists done")
 
     do_generate = True
-    do_generate = not myexists(".game/ready")
+    #do_generate = not myexists(".game/ready")
 
     if do_generate:
         print("cleaning up...")
