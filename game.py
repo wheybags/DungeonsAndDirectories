@@ -578,7 +578,7 @@ def get_l2():
     message = "The light is getting brighter! You must have found a tunnel to the surface!.\n"
     room.messages.append([message, {}])
 
-    room.level_resources.append(["images_tunnel.jpg", "tunnel.jpg"])
+    room.level_resources.append(["images_exit.png", "tunnel.png"])
 
     # exit corridor 2
     room = l.sym_to_room['c']
@@ -587,7 +587,6 @@ def get_l2():
     message += "Congratulations on escaping from the Dungeon of Directories!\n"
     room.messages.append([message, {}])
     room.suppress_directions = ['North', 'East', 'South', 'West']
-    room.level_resources.append(["images_winner.jpg", "winner.jpg"])
 
     # ogre room
     room = l.sym_to_room['o']
