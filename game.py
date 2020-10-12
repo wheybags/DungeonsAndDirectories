@@ -534,6 +534,10 @@ def get_l2():
         with open(os.path.abspath(os.path.dirname(__file__)) + "/images/l2/" + fn, "rb") as f:
             l.resources.append(["images_" + fn, f.read()])
 
+    for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/resources/l2/"):
+        with open(os.path.abspath(os.path.dirname(__file__)) + "/resources/l2/" + fn, "rb") as f:
+            l.resources.append(["resources_" + fn, f.read()])
+
     # start room
     room = l.sym_to_room['@']
 
@@ -587,6 +591,9 @@ def get_l2():
     message += "Congratulations on escaping from the Dungeon of Directories!\n"
     room.messages.append([message, {}])
     room.suppress_directions = ['North', 'East', 'South', 'West']
+
+    room.level_resources.append(["resources_learnmore.html", "Secret club for people who finished the game.html"])
+
 
     # ogre room
     room = l.sym_to_room['o']
