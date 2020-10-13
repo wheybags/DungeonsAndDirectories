@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-set -ex
+set -euxo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$DIR"
 
 make_zip() {
   dir="$1"
@@ -15,32 +16,56 @@ make_zip() {
 
     "$DIR/7z1900-extra/7za.exe" a "$zipfile" "$dir"
   else
-    zip -r "$dir" "$zipfile"
+    zip -r "$zipfile" "$dir"
   fi
 }
 
+package_common() {
+  cp -r ../../../../images .
+  cp -r ../../../../resources .
+  cp ../../../../*.py .
+}
+
+package_win() {
+  mkdir -p packages/windows/dungeons_and_directories/assets
+  pushd packages/windows/dungeons_and_directories/assets
+
+  mkdir python
+  cd python
+  unzip ../../../../../python-3.8.3-embed-amd64.zip
+  cd ..
+
+  package_common
+
+  cd ..
+  cp -r ../../../run_windows.bat run_dungeons_and_directories.bat
+
+  popd
+
+  make_zip packages/windows/dungeons_and_directories packages/dungeons_and_directories_windows_amd64.zip
+  rm -rf packages/windows
+}
+
+package_linux() {
+  mkdir -p packages/linux/dungeons_and_directories/assets
+  pushd packages/linux/dungeons_and_directories/assets
+
+  package_common
+
+  cd ..
+  echo '#!/bin/bash' >> run_dungeons_and_directories.sh
+  echo 'DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"' >> run_dungeons_and_directories.sh
+  echo 'cd "$DIR"' >> run_dungeons_and_directories.sh
+  echo './assets/game.py' >> run_dungeons_and_directories.sh
+  chmod +x run_dungeons_and_directories.sh
+
+  popd
+
+  make_zip packages/linux/dungeons_and_directories packages/dungeons_and_directories_linux_amd64.zip
+  rm -rf packages/linux
+}
 
 if [ -e packages ]; then rm -rf packages; fi
-mkdir packages
 
-cd packages
-
-
-mkdir -p windows/dungeons_and_directories/assets
-pushd windows/dungeons_and_directories/assets
-
-mkdir python
-cd python
-unzip ../../../../../python-3.8.3-embed-amd64.zip
-cd ..
-
-cp -r ../../../../images .
-cp ../../../../*.py .
-
-cd ..
-cp -r ../../../run_windows.bat run_dungeons_and_directories.bat
-
-cd ..
-make_zip dungeons_and_directories/ dungeons_and_directories_win64.zip
-
-popd
+package_win
+package_linux
