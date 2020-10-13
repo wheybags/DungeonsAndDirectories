@@ -21,6 +21,9 @@
 
                 position: absolute;
                 padding-bottom: 60px;
+                padding-top: 64px;
+
+                transform-origin: 0 0;
             }
 
             #centre_inner {
@@ -42,16 +45,25 @@
             var position_image = function()
             {
                 var elem = document.getElementById("centre_main");
-
                 var width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                var height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                var tile_size = 32;
 
+                var reference_width = elem.clientWidth * 1.5;
+                var reference_height = elem.clientHeight * 1;
 
+                var scale_by_w = Math.max(1, width / reference_width);
+                var scale_by_h = Math.max(1, height / reference_height);
+                var doc_scale = Math.min(scale_by_w, scale_by_h);
 
-                var left = width / 2 - elem.clientWidth / 2;
-                left = Math.round(left / 32) * 32;
+                var tiles_l = (width / 2) / (tile_size * doc_scale) - (elem.clientWidth/tile_size)/2;
+                var px_l = tiles_l * tile_size * doc_scale;
 
-                console.log("SETTING " + left + " - " + left/32.0);
-                elem.style.left = left + "px";
+                elem.style.left = px_l + "px";
+                elem.style.transform = "scale(" + doc_scale + ")";
+                document.getElementsByTagName("body")[0].style.backgroundSize = "" + (doc_scale * tile_size) + "px " + (doc_scale * tile_size) + "px";
+
+                document.getElementsByTagName("body")[0].style.backgroundPosition = "" + px_l + "px 0px";
             };
 
             window.onload = position_image;
