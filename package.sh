@@ -46,6 +46,7 @@ package_win() {
   make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_windows_amd64.zip"
   cd ..
   rm -rf windows
+  cd ..
 }
 
 package_linux() {
@@ -67,6 +68,7 @@ package_linux() {
   make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_linux_amd64.zip"
   cd ..
   rm -rf linux
+  cd ..
 }
 
 package_osx() {
@@ -90,6 +92,7 @@ package_osx() {
   make_zip dungeons_and_directories.app "$DIR/packages/dungeons_and_directories_osx.zip"
   cd ..
   rm -rf osx
+  cd ..
 }
 
 
