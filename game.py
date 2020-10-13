@@ -705,8 +705,7 @@ def __main__():
     l1.render()
     print("generating lists done")
 
-    do_generate = True
-    #do_generate = not myexists(".game/ready")
+    do_generate = not myexists(".game/ready")
 
     if do_generate:
         print("cleaning up...")
