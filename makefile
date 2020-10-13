@@ -21,6 +21,7 @@ $(eval $(call gen_aseprite_export,images/l2/exit.png,source_images/exit.aseprite
 
 # Other
 $(eval $(call gen_aseprite_export,readme_banner.gif,source_images/dungeon_logo.aseprite,4))
+$(eval $(call gen_aseprite_export,website/gfx/banner.gif,source_images/dungeon_logo.aseprite,4))
 
 .DEFAULT_GOAL := all
 .PHONY: all
