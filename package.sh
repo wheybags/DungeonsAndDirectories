@@ -42,8 +42,10 @@ package_win() {
 
   popd
 
-  make_zip packages/windows/dungeons_and_directories packages/dungeons_and_directories_windows_amd64.zip
-  rm -rf packages/windows
+  cd packages/windows
+  make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_windows_amd64.zip"
+  cd ..
+  rm -rf windows
 }
 
 package_linux() {
@@ -61,8 +63,10 @@ package_linux() {
 
   popd
 
-  make_zip packages/linux/dungeons_and_directories packages/dungeons_and_directories_linux_amd64.zip
-  rm -rf packages/linux
+  cd packages/linux
+  make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_linux_amd64.zip"
+  cd ..
+  rm -rf linux
 }
 
 package_osx() {
