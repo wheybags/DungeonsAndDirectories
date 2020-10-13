@@ -698,7 +698,13 @@ def __main__():
     l1 = get_l1(l2)
 
     instructions_room = l1.message_room(None)
-    instructions_room.level_resources.append(["images_instructions.png", "instructions.png"])
+    if sys.platform == 'win32':
+        instructions_room.level_resources.append(["images_instructions_windows.png", "instructions.png"])
+    elif sys.platform == 'darwin':
+        instructions_room.level_resources.append(["images_instructions_osx.png", "instructions.png"])
+    elif sys.platform.startswith('linux'):
+        instructions_room.level_resources.append(["images_instructions_linux.png", "instructions.png"])
+
     instructions_room.choices.append(["Start (Read instructions first!)", l1.sym_to_room['@'], {}, {}, False])
 
     l2.render()
