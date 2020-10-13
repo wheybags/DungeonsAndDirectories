@@ -21,9 +21,9 @@ make_zip() {
 }
 
 package_common() {
-  cp -r ../../../../images .
-  cp -r ../../../../resources .
-  cp ../../../../*.py .
+  cp -r "$DIR/images" .
+  cp -r "$DIR/resources" .
+  cp "$DIR/"*.py .
 }
 
 package_win() {
@@ -65,7 +65,33 @@ package_linux() {
   rm -rf packages/linux
 }
 
+package_osx() {
+  mkdir -p packages/osx/dungeons_and_directories.app/Contents/MacOS/assets
+  pushd packages/osx/dungeons_and_directories.app/Contents/MacOS/assets
+
+  package_common
+
+  cd ..
+  
+  echo '#!/bin/bash' >> dungeons_and_directories
+  echo 'DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"' >> dungeons_and_directories
+  echo 'cd "$DIR"' >> dungeons_and_directories
+  echo 'open -a Terminal ./assets/game.py' >> dungeons_and_directories
+
+  chmod +x dungeons_and_directories
+
+  popd
+
+  cd packages/osx
+  make_zip dungeons_and_directories.app "$DIR/packages/dungeons_and_directories_osx.zip"
+  cd ..
+  rm -rf osx
+}
+
+
+
 if [ -e packages ]; then rm -rf packages; fi
 
 package_win
 package_linux
+package_osx

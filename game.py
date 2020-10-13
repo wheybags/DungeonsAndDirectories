@@ -730,6 +730,8 @@ def __main__():
 
     if sys.platform == 'win32':
         subprocess.call(["explorer.exe", get_windows_path(instructions_room.get_dir(instructions_room.level.default_values))])
+    elif sys.platform == 'darwin':
+        subprocess.Popen(["open", instructions_room.get_dir(instructions_room.level.default_values)], close_fds=True)
     elif sys.platform.startswith('linux'):
         subprocess.Popen(["xdg-open", instructions_room.get_dir(instructions_room.level.default_values)], close_fds=True)
 
