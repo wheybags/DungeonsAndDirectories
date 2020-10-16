@@ -6,6 +6,7 @@ import hashlib
 import sys
 import subprocess
 import shutil
+import base64
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -15,6 +16,13 @@ directions = [
     ('South', (0, 1)),
     ('West', (-1, 0))
 ]
+
+convert_gifs_to_html = False
+
+# The default image viewer on macos doesn't animate gifs, it shows the frames in a list.
+# This is pretty shit...
+if sys.platform == 'darwin':
+    convert_gifs_to_html = True
 
 if sys.platform == 'win32':
     import swinlnk
@@ -394,7 +402,13 @@ class Level(object):
         perm(self.variables, {}, 0, render_one_perm)
 
         for r in self.resources:
-            create_file(self.base_dir + "/" + r[0], r[1])
+            name = r[0]
+            data = r[1]
+            if convert_gifs_to_html and name.endswith(".gif"):
+                name = name.replace(".gif", ".html")
+                data = b'<html><body><img src="data:image/png;base64,' + base64.b64encode(data) + b'"></body></html>'
+
+            create_file(self.base_dir + "/" + name, data)
 
     def render_teleport(self, link_name, from_room, to_room, from_env, to_env):
         mysymlink(to_room.get_dir(to_env), from_room.get_dir(from_env) + "/" + link_name)
@@ -416,6 +430,10 @@ class Level(object):
         return "\n".join(lines)
 
     def render_resource_in_room(self, room, resource_name, name_in_room, env):
+        if convert_gifs_to_html:
+            resource_name = resource_name.replace(".gif", ".html")
+            name_in_room = resource_name.replace(".gif", ".gif.html")
+
         mysymlink(self.base_dir + "/" + resource_name, room.get_dir(env) + "/" + name_in_room)
 
 
