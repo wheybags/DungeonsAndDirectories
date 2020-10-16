@@ -5,6 +5,7 @@ import shutil
 import hashlib
 import sys
 import subprocess
+import shutil
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -94,6 +95,17 @@ def real_make_link(dest, src):
         dest = get_windows_path(dest)[4:]
 
         swl.create_lnk(dest, src)
+    elif sys.platform.startswith("linux"):
+        if os.path.isdir(dest):
+            with open(src, "w") as f:
+                link_data = "[Desktop Entry]\n"
+                link_data += "Icon=folder\n"
+                link_data += "Type=Link\n"
+                link_data += "URL[$e]=file://{}\n"
+
+                f.write(link_data.format(os.path.abspath(dest)))
+        else:
+            os.symlink(os.path.abspath(dest), src)
     else:
         os.symlink(os.path.abspath(dest), src)
 
@@ -693,6 +705,14 @@ def get_l2():
 
 
 def __main__():
+    if sys.platform.startswith('linux'):
+        if not shutil.which("dolphin"):
+            print('You need to have the "Dolphin" file manager installed.', file=sys.stderr)
+            print('It can be installed with your system package manager, by eg:', file=sys.stderr)
+            print('"sudo apt install dolphin" or "sudo yum install dolphin"', file=sys.stderr)
+            input('Press enter to exit')
+            exit(1)
+
     print("generating lists...")
     l2 = get_l2()
     l1 = get_l1(l2)
@@ -733,7 +753,7 @@ def __main__():
     elif sys.platform == 'darwin':
         subprocess.Popen(["open", instructions_room.get_dir(instructions_room.level.default_values)], close_fds=True)
     elif sys.platform.startswith('linux'):
-        subprocess.Popen(["xdg-open", instructions_room.get_dir(instructions_room.level.default_values)], close_fds=True)
+        subprocess.call(["dolphin", instructions_room.get_dir(instructions_room.level.default_values)])
 
 
 if __name__ == "__main__":
