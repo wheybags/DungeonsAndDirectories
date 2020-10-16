@@ -599,7 +599,7 @@ def get_l2():
     room = l.sym_to_room['o']
 
     room.suppress_directions = ['South', 'East', 'North', 'West']
-    room.level_resources.append(["images_ogre.png", "ogre.png"])
+    room.level_resources.append(["images_ogre.gif", "ogre.gif"])
 
     hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
                 (True, False, False), (True, False, True), (True, True, False), (True, True, True)]
