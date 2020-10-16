@@ -405,7 +405,7 @@ class Level(object):
             name = r[0]
             data = r[1]
             if convert_gifs_to_html and name.endswith(".gif"):
-                name = name.replace(".gif", ".html")
+                name = name.replace(".gif", ".gif.html")
                 data = b'<html><body><img src="data:image/png;base64,' + base64.b64encode(data) + b'"></body></html>'
 
             create_file(self.base_dir + "/" + name, data)
@@ -431,8 +431,8 @@ class Level(object):
 
     def render_resource_in_room(self, room, resource_name, name_in_room, env):
         if convert_gifs_to_html:
-            resource_name = resource_name.replace(".gif", ".html")
-            name_in_room = resource_name.replace(".gif", ".gif.html")
+            resource_name = resource_name.replace(".gif", ".gif.html")
+            name_in_room = name_in_room.replace(".gif", ".gif.html")
 
         mysymlink(self.base_dir + "/" + resource_name, room.get_dir(env) + "/" + name_in_room)
 
@@ -457,7 +457,7 @@ def get_l1(l2):
 
     for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/images/l1/"):
         with open(os.path.abspath(os.path.dirname(__file__)) + "/images/l1/" + fn, "rb") as f:
-            l.resources.append(["images_" + fn, f.read()])
+            l.resources.append([fn, f.read()])
 
     # start room
     room = l.sym_to_room['@']
@@ -466,7 +466,7 @@ def get_l1(l2):
     message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
     message += " Warily, you pull yourself up onto your feet."
     room.messages.append([message, {}])
-    room.level_resources.append(["images_dungeon.gif", "dungeon.gif"])
+    room.level_resources.append(["dungeon.gif", "dungeon.gif"])
 
     # chasm room
     room = l.sym_to_room['y']
@@ -482,7 +482,7 @@ def get_l1(l2):
     death_message += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
     death_message += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
     death_room = l.death_room(death_message)
-    death_room.level_resources.append(["images_chasm.gif", "chasm.gif"])
+    death_room.level_resources.append(["chasm.gif", "chasm.gif"])
 
     room.suppress_directions = ['North']
     room.choices.append(['Move North (Try to jump the gap)', death_room, {}, {}, False])
@@ -497,7 +497,7 @@ def get_l1(l2):
 
     death_message = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
     death_room = l.death_room(death_message)
-    death_room.level_resources.append(["images_cliff_walk.png", "you.png"])
+    death_room.level_resources.append(["you.png", "you.png"])
 
     room.suppress_directions = ['South']
     room.choices.append(['Move South', death_room, {}, {}, False])
@@ -533,7 +533,7 @@ def get_l1(l2):
     message += "You bend to examine it. It's a key! That might come in handy."
     room.messages.append([message, {"hasKey": False}])
 
-    room.level_resources.append(["images_key.gif", "key.gif"])
+    room.level_resources.append(["key.gif", "key.gif"])
 
     # door room 
     room = l.sym_to_room['d']
@@ -557,7 +557,7 @@ def get_l1(l2):
     room.choices.append(['Go through the door', go_to_l2_room, {}, {"hasKey": True}, False])
     room.choices.append(['Go through the door', cant_open_door_room, {}, {"hasKey": False}, False])
 
-    room.level_resources.append(["images_door.png", "door.png"])
+    room.level_resources.append(["door.png", "door.png"])
 
     return l
 
@@ -584,11 +584,11 @@ def get_l2():
 
     for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/images/l2/"):
         with open(os.path.abspath(os.path.dirname(__file__)) + "/images/l2/" + fn, "rb") as f:
-            l.resources.append(["images_" + fn, f.read()])
+            l.resources.append([fn, f.read()])
 
     for fn in os.listdir(os.path.abspath(os.path.dirname(__file__)) + "/resources/l2/"):
         with open(os.path.abspath(os.path.dirname(__file__)) + "/resources/l2/" + fn, "rb") as f:
-            l.resources.append(["resources_" + fn, f.read()])
+            l.resources.append([fn, f.read()])
 
     # start room
     room = l.sym_to_room['@']
@@ -634,7 +634,7 @@ def get_l2():
     message = "The light is getting brighter! You must have found a tunnel to the surface!.\n"
     room.messages.append([message, {}])
 
-    room.level_resources.append(["images_exit.png", "tunnel.png"])
+    room.level_resources.append(["tunnel.png", "tunnel.png"])
 
     # exit corridor 2
     room = l.sym_to_room['c']
@@ -644,14 +644,14 @@ def get_l2():
     room.messages.append([message, {}])
     room.suppress_directions = ['North', 'East', 'South', 'West']
 
-    room.level_resources.append(["resources_learnmore.html", "Secret club for people who finished the game.html"])
+    room.level_resources.append(["Secret club for people who finished the game.html", "Secret club for people who finished the game.html"])
 
 
     # ogre room
     room = l.sym_to_room['o']
 
     room.suppress_directions = ['South', 'East', 'North', 'West']
-    room.level_resources.append(["images_ogre.gif", "ogre.gif"])
+    room.level_resources.append(["ogre.gif", "ogre.gif"])
 
     hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
                 (True, False, False), (True, False, True), (True, True, False), (True, True, True)]
@@ -759,11 +759,11 @@ def __main__():
 
     instructions_room = l1.message_room(None)
     if sys.platform == 'win32':
-        instructions_room.level_resources.append(["images_instructions_windows.png", "instructions.png"])
+        instructions_room.level_resources.append(["instructions_windows.png", "instructions_windows.png"])
     elif sys.platform == 'darwin':
-        instructions_room.level_resources.append(["images_instructions_osx.png", "instructions.png"])
+        instructions_room.level_resources.append(["instructions_osx.png", "instructions_osx.png"])
     elif sys.platform.startswith('linux'):
-        instructions_room.level_resources.append(["images_instructions_linux.png", "instructions.png"])
+        instructions_room.level_resources.append(["instructions_linux.png", "instructions_linux.png"])
 
     instructions_room.choices.append(["Start (Read instructions first!)", l1.sym_to_room['@'], {}, {}, False])
 
