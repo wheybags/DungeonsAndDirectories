@@ -62,6 +62,8 @@ package_linux() {
   echo './assets/game.py' >> run_dungeons_and_directories.sh
   chmod +x run_dungeons_and_directories.sh
 
+  echo 'Please run the game in a terminal!' > readme_really_short_i_swear.txt
+
   popd
 
   cd packages/linux
