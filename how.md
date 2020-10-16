@@ -1,14 +1,14 @@
 # How was this made?
 
-Warning: the following explanation presumes you are familiar with programming and filesystem concepts like symbolic links. It might be fun to read even if you're not, but I couldn't say.
+Warning: the following explanation presumes you are familiar with programming and filesystem concepts like symbolic links. It might be fun to read even if you're not, but I couldn't say. Also, you should play the game before reading this.
 
 In any game, the world is a big glob of state variables.
 The core idea is to model that state exhaustively. For now, let's presume we only have boolean variables. We can model the world as a list of booleans, like "has_key=true,has_sword=false". In this example, we would have 2*2 = 4 possible combinations. We also have a list of "rooms", let's say maybe 3 rooms in a line, like so:
-```
-┌─────┬─────┬─────┐
-│ 0,0 │ 1,0 │ 2,0 │
-└─────┴─────┴─────┘
-```
+
+    ┌─────┬─────┬─────┐
+    │_0,0_│_1,0_│_2,0_│
+    └─────┴─────┴─────┘
+
 
 For each room we create a room object.
 
@@ -20,7 +20,7 @@ foreach (var has_key in {false, true}):
             create_room_folder(folder_name + "_key_" + has_key + "_sword_" + has_sword)
 ```
 
-So we end up with 3 * 2 * 2 = 12 folders, each on representing a position and a set of variables.
+So we end up with 3 * 2 * 2 = 12 folders, each one representing a position and a set of variables.
 
 Next we make symbolic links (or shortcuts on windows) from each "room folder" to the next.
 
