@@ -180,6 +180,28 @@ def get_env_str(env):
     return "^".join(s)
 
 
+def obfuscate_str(string):
+    # return string
+
+    if "lookup" not in obfuscate_str.__dict__:
+        # something a bit like rot13, but does numbers and some special chars too
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_^!"
+        obfuscate_str.lookup = {}
+        for char in chars:
+            rotate_index = chars.index(char) + int(len(chars) / 2)
+            rotate_index = rotate_index % len(chars)
+            obfuscate_str.lookup[char] = chars[rotate_index]
+
+    retval = []
+    for char in string:
+        if char in obfuscate_str.lookup:
+            retval.append(obfuscate_str.lookup[char])
+        else:
+            retval.append(char)
+
+    return "".join(retval)
+
+
 class Room(object):
     def __init__(self, level, x, y, passable, symbol):
         self.level = level
@@ -196,7 +218,7 @@ class Room(object):
         self.level_resources = []
 
     def get_dir(self, env):
-        return self.level.base_dir + "/" + str(self.x).zfill(4) + "_" + str(self.y).zfill(4) + get_env_str(env)
+        return self.level.base_dir + "/" + obfuscate_str(str(self.x).zfill(4) + "_" + str(self.y).zfill(4) + get_env_str(env))
 
     def render_basic(self, env, allow_generate_message=True):
         my_dir = self.get_dir(env)
@@ -298,7 +320,7 @@ class MessageRoom(Room):
         MessageRoom.id += 1
 
     def get_dir(self, env):
-        return self.level.base_dir + "/message_" + str(self.id) + get_env_str(env)
+        return self.level.base_dir + "/" + obfuscate_str("message_" + str(self.id) + get_env_str(env))
 
     def render(self, env):
         self.render_basic(env, False)
