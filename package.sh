@@ -67,7 +67,7 @@ package_linux() {
   popd
 
   cd packages/linux
-  make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_linux_amd64.zip"
+  make_zip dungeons_and_directories "$DIR/packages/dungeons_and_directories_linux.zip"
   cd ..
   rm -rf linux
   cd ..
