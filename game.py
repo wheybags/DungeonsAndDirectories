@@ -430,6 +430,14 @@ class Level(object):
         return "\n".join(lines)
 
     def render_resource_in_room(self, room, resource_name, name_in_room, env):
+        # workaround for weird issue on windows where double clicking a shortcut to a html file doesn't open it
+        if resource_name.endswith("html"):
+            for r in self.resources:
+                if r[0] == resource_name:
+                    create_file(room.get_dir(env) + "/" + name_in_room, r[1])
+                    return
+            raise Exception()
+
         if convert_gifs_to_html:
             resource_name = resource_name.replace(".gif", ".gif.html")
             name_in_room = name_in_room.replace(".gif", ".gif.html")
