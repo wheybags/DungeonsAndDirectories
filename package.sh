@@ -39,6 +39,7 @@ package_win() {
 
   cd ..
   cp -r ../../../run_windows.bat run_dungeons_and_directories.bat
+  cp -r ../../../uninstall_windows.bat uninstall.bat
 
   popd
 
