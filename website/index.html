@@ -66,6 +66,30 @@
                 width: 100%;
             }
 
+            .website_corner {
+                position: fixed;
+                top: 0;
+                right: 0;
+                z-index: 1000;
+                width: calc(min(35vw, 264px));
+                height: calc(min(35vw, 264px));
+                pointer-events: none;
+            }
+
+            .website_corner_link {
+                background-color: transparent !important;
+                position: fixed;
+                top: -100vw;
+                right: -100vw;
+                z-index: 1001;
+                display: block;
+                width: calc(calc(min(35vw, 264px)) + 100vw);
+                height: 100vw;
+                /*background-color: rgb(255 0 0 / 50%);*/
+                transform-origin: bottom left;
+                transform: rotate(45deg);
+            }
+
         </style>
 
         <link href="./fonts.css" rel="stylesheet" type="text/css">
@@ -143,5 +167,8 @@
             </div>
             <img src="./gfx/web_bottom.gif" style="display:block;">
         </div>
+
+        <img class="website_corner" src="/assets/website_corner.png">
+        <a class="website_corner_link" href="https://store.steampowered.com/app/2338630/Drilbert?utm_source=corner"></a>
     </body>
 </html>
