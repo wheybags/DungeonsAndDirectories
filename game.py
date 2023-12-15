@@ -257,7 +257,7 @@ class Room(object):
                 message = m
 
         if message is None and allow_generate_message:
-            message = "You see a dank dungeon room before you "
+            message = "你眼前是一间阴暗的地牢 "
 
             if len(doors):
                 message += "with " + ("doors" if len(doors) > 1 else "a door") + " exiting to the "
@@ -269,7 +269,7 @@ class Room(object):
 
                 message += "."
             else:
-                message += "with smooth walls on every side. How did you even get here!"
+                message += "四面都是光滑的墙壁。你是怎么到这儿来的!"
 
         if message:
             msg = [x for x in message.split('\n') if x]
@@ -374,8 +374,8 @@ class Level(object):
         return r
 
     def death_room(self, message):
-        r = self.message_room(message + "\nYou died.")
-        r.choices.append(["Restart from beginning of the level", self.sym_to_room['@'], self.default_values, {}, True])
+        r = self.message_room(message + "\n你死了.")
+        r.choices.append(["从关卡开始重新开始", self.sym_to_room['@'], self.default_values, {}, True])
         return r
 
     def render(self):
@@ -469,41 +469,41 @@ def get_l1(l2):
 
     # start room
     room = l.sym_to_room['@']
-    message = "You wake up to find yourself spread on the floor inside a cold and horrible dungeon. There is a barred door to your back,\n"
-    message += " and a thin corridor in front of you. A lit brazier guides the path ahead.\n"
-    message += " You reach up and feel your head. It hurts like hell and you've got a bruise the size of a grapefruit bulging up on your forehead.\n"
-    message += " Warily, you pull yourself up onto your feet."
+    message = "你醒来发现自己躺在一个冰冷恐怖的地牢里。你的背后有一扇开着的门,\n"
+    message += " 在你面前是一条狭窄的走廊。点燃的火盆指引着前方的道路.\n"
+    message += " 你伸出手，摸摸你的头。疼得要命，你的额头上有一块葡萄柚大小的淤青.\n"
+    message += " 你小心翼翼地站了起来."
     room.messages.append([message, {}])
     room.level_resources.append(["dungeon.gif", "dungeon.gif"])
 
     # chasm room
     room = l.sym_to_room['y']
-    message = "To the North, you see an open door. Through the door, you can just spot the glint of light on metal. Your eyes perk up with interest.\n"
-    message += "Could it be gold...\n"
-    message += "You start towards the door, and just catch yourself before you fall right off the edge of a deep, dark precipice.\n"
-    message += "Between you and the North door, there's a huge crack in the rocky floor.\n"
-    message += "It's about three metres wide, but you you reckon maybe you could jump it.\n"
-    message += "There are also doors on the other walls of the room, on this side of the crack."
+    message = "往北，你看到一扇敞开的门。透过门，你只能看到金属上闪烁的光。你的眼睛充满了兴趣.\n"
+    message += "会是金子吗？...\n"
+    message += "你开始向门口走去，在你从黑暗的悬崖边上掉下去之前，你要抓住自己.\n"
+    message += "在你和北门之间，岩石地板上有一条巨大的裂缝.\n"
+    message += "它大概有三米宽，但是你觉得你可以跳过去.\n"
+    message += "房间的另一面墙上也有门，就在裂缝的这一边."
     room.messages.append([message, {}])
 
-    death_message = "You take a few steps back, run up, and leap towards the door. At the midway point you see over a lump in the door frame,\n"
-    death_message += "the glint of gold was just a puddle! You have no time for outrage however, as you slam into the other side of the precipice.\n"
-    death_message += "Your fingers fumble for a hold, but it's too late, you've not made it. You feel the wall slide past your hands as you start to fall...\n"
+    death_message = "你后退几步，跑上去，向门口跳去。在中间，你可以看到门框上有一个肿块,\n"
+    death_message += "闪闪发光的黄金只是一个水坑!然而，你没有时间愤怒，因为你撞到了悬崖的另一边.\n"
+    death_message += "你的手指摸索着要抓住，但是太晚了，你还没有抓住。当你开始下落时，你感觉到墙从你的手中滑过...\n"
     death_room = l.death_room(death_message)
     death_room.level_resources.append(["chasm.gif", "chasm.gif"])
 
     room.suppress_directions = ['North']
-    room.choices.append(['Move North (Try to jump the gap)', death_room, {}, {}, False])
+    room.choices.append(['向北移动(试着跳过缺口)', death_room, {}, {}, False])
 
     # puddle room
     room = l.sym_to_room['x']
-    message = "You remember from earlier that you saw a glint of gold through a doorway.\n"
-    message += "Thinking about it, you realise you've walked around the chasm, and should be in the room you could see before.\n"
-    message += "You walk over to the southern door to investigate, but find nothing but a puddle with a yellow gint of light reflecting off it.\n"
-    message += "Good thing you didn't risk jumping that gap for a bleedin' puddle, you think to yourself.\n"
+    message = "你还记得早些时候你看到一道门里闪过一道金光.\n"
+    message += "想想看，你意识到你已经绕着鸿沟走了一圈，应该在你之前能看到的房间里.\n"
+    message += "你走到南门去调查，但什么也没发现，只有一个水坑，上面反射着黄色的光.\n"
+    message += "你心里想，还好你没有冒着跳进那该死的水坑的风险.\n"
     room.messages.append([message, {}])
 
-    death_message = "You walk through the southern door, and straight into the chasm you saw earlier. Why did you do that you silly old sod...\n"
+    death_message = "你穿过南门，直接进入你刚才看到的深渊。你为什么要那样做，你这个愚蠢的老家伙...\n"
     death_room = l.death_room(death_message)
     death_room.level_resources.append(["you.png", "you.png"])
 
@@ -513,57 +513,59 @@ def get_l1(l2):
     # map room
     room = l.sym_to_room['m']
 
-    map_str = "You pick up the map and have a look.\n"
-    map_str += "You realise that the map seems to show open areas with a # symbol, and the surrounding rock with .\n"
-    map_str += "You quickly work out your own position, and note it down with an @ symbol.\n"
-    map_str += "You think to yourself that this is a good system, and you should probably use it to keep track of your position,\n"
-    map_str += "and maybe use it to make new maps for yourself if you leave the mapped area (or use a piece of paper, which might be easier).\n\n\n"
+    map_str = "你拿起地图看一看.\n"
+    map_str += "你意识到地图上似乎用#符号表示开放区域，周围的岩石用 .\n"
+    map_str += "您可以快速计算出自己的位置，并用@符号将其记录下来.\n"
+    map_str += "你认为这是一个很好的系统，你应该用它来记录你的位置,\n"
+    map_str += "如果你离开地图区域，可以用它来为自己制作新的地图(或者使用一张纸，这可能更容易)。.\n\n\n"
     map_str += l.get_map([room.x, room.y])
     l.resources.append(["map.txt", map_str])
 
-    message = "As you enter the room, your foot brushes a scroll on the floor.\n"
-    message += "You bend to pick it up and have a look. You realise that it's a map! This will come in handy.\n"
+    message = "当你进入房间时，你的脚在地板上擦过一个卷轴.\n"
+    message += "你弯腰把它捡起来看一看。你知道这是一张地图!这个迟早会派上用场的.\n"
     room.messages.append([message, {}])
+
 
     room.level_resources.append(["map.txt", "map.txt"])
 
     # fork room
     room = l.sym_to_room['f']
-    message = "You see a fork in the path ahead of you. A foul smell wafts towards your nostrils from the East passage.\n"
-    message += "From the West passage, you think you can feel a slight breeze of fresh air."
+    message = "你看到前方有个岔路口。一股恶臭从东面的通道飘向你的鼻孔.\n"
+    message += "从西边的通道，你会觉得你能感觉到一阵轻微的新鲜空气."
     room.messages.append([message, {}])
 
     # key room
     room = l.sym_to_room['k']
 
     room.choices.append(['Pick up the key', room, {"hasKey": True}, {"hasKey": False}, False])
-    message = "As you enter the room, you notice a glint of something shiny poking through the dirt under your boot.\n"
-    message += "You bend to examine it. It's a key! That might come in handy."
+    message = "当你走进房间的时候，你注意到一个闪亮的东西从你靴子下面的泥土里伸出来.\n"
+    message += "你弯下腰去检查它。这是一把钥匙!这可能会派上用场."
     room.messages.append([message, {"hasKey": False}])
+
 
     room.level_resources.append(["key.gif", "key.gif"])
 
     # door room 
     room = l.sym_to_room['d']
 
-    message = "Set deep into the wall on the North end of the room, is a large and imposing door.\n"
-    message += "It is made of thick hardwood, and revolves on a masive iron hinge.\n"
-    message += "Seeping around the edges is a slight breeze of some fresher air."
+    message = "房间北端的墙壁深处有一扇巨大而雄伟的门.\n"
+    message += "它由厚厚的硬木制成，在一个巨大的铁铰链上旋转.\n"
+    message += "从边缘渗透进来的是一股清新的微风."
     room.messages.append([message, {}])
 
-    cant_open_door_room = l.message_room("You try and try, but the door just won't budge. It must be locked.")
+    cant_open_door_room = l.message_room("你试了又试，但门就是不动。它一定是锁着的.")
     cant_open_door_room.choices.append(["Ok", room, {}, {}, False])
 
-    open_door_message = "You push hard at the door, but it doesn't budge an inch.\n"
-    open_door_message += "You notice a small keyhole on the right hand side of the door.\n"
-    open_door_message += "On a whim, you slot the key you picked up earlier into the keyhole, and twist hard. It turns!\n"
-    open_door_message += "You push again at the door, and it slides back. A rush of fresher air hits your face.\n"
-    open_door_message += "The door reveals a short corridoor leading to a spiral staircase, heading up towards the surface."
+    open_door_message = "你使劲推门，但门一动也不动.\n"
+    open_door_message += "你注意到门的右手边有一个小钥匙孔.\n"
+    open_door_message += "一时兴起，你把之前拿起的钥匙插进钥匙孔，使劲拧。转动它!\n"
+    open_door_message += "你再推一下门，门就滑回去了。一股清新的空气打在你的脸上.\n"
+    open_door_message += "门上有一条通往螺旋楼梯的短走廊，通往地面."
     go_to_l2_room = l.message_room(open_door_message)
-    go_to_l2_room.choices.append(["Climb the staircase", l2.sym_to_room['@'], l2.default_values, {}, True])
+    go_to_l2_room.choices.append(["爬楼梯", l2.sym_to_room['@'], l2.default_values, {}, True])
 
-    room.choices.append(['Go through the door', go_to_l2_room, {}, {"hasKey": True}, False])
-    room.choices.append(['Go through the door', cant_open_door_room, {}, {"hasKey": False}, False])
+    room.choices.append(['从那扇门进去', go_to_l2_room, {}, {"hasKey": True}, False])
+    room.choices.append(['从那扇门进去', cant_open_door_room, {}, {"hasKey": False}, False])
 
     room.level_resources.append(["door.png", "door.png"])
 
@@ -601,54 +603,54 @@ def get_l2():
     # start room
     room = l.sym_to_room['@']
 
-    start_message = "Just as you step off the stairs onto the new level, the staircase begins to grumble and crunch behind you.\n"
-    start_message += "It collapses into a pile of rubble, leaving just a deep hole.\n"
-    start_message += "You won't be going back that way.\n"
-    start_message += "You take a look at your map, and realise that you've left the covered area. You'll need to start making your own.\n"
+    start_message = "就在你走下楼梯来到新的一层时，楼梯开始在你身后咕咕作响.\n"
+    start_message += "它坍塌成一堆瓦砾，只留下一个深洞.\n"
+    start_message += "你不会从那条路回去的.\n"
+    start_message += "你看了看地图，意识到你已经离开了覆盖区域。你得开始自己做了.\n"
     room.messages.append([start_message, {}])
 
     # fork room
     room = l.sym_to_room['f']
 
-    message = "You come to a three way fork in the tunnel.\n"
-    message += "You think you see a spark of light down the Northern tunnel, maybe it's the way out."
+    message = "你走到隧道的三岔路口.\n"
+    message += "你以为在北边的隧道里看到了闪光，也许那就是出去的路."
     room.messages.append([message, {}])
 
     # sword room
     room = l.sym_to_room['s']
-    sword_message = "As you enter, you notice racks and targets scattered about the room.\n"
-    sword_message += "It appears to be some sort of armoury, but it was abandoned a long time ago and is in pretty bad shape.\n"
-    sword_message += "In one of the corners, something catches your eye. It's a sword! And it's in decent condition too."
+    sword_message = "当你进入，你注意到架子和目标散落在房间里.\n"
+    sword_message += "它看起来像是某种军械库，但它很久以前就被遗弃了，而且情况很糟糕.\n"
+    sword_message += "在一个角落里，有东西吸引了你的目光。这是一把剑!而且它的状况也很好."
     room.messages.append([sword_message, {"sword": False}])
 
-    room.choices.append(["Pick up the sword", room, {"sword": True}, {"sword": False}, False])
+    room.choices.append(["拿起剑", room, {"sword": True}, {"sword": False}, False])
 
     # shield room
     room = l.sym_to_room['h']
-    shield_message = "There is a skeleton in the far corner of the room.\n"
-    shield_message += "Clutched in its bony fingers is a wide wooden shield.\n"
+    shield_message = "房间远处的角落里有一具骷髅.\n"
+    shield_message += "它瘦骨嶙峋的手指上抓着一个宽大的木制盾牌.\n"
     room.messages.append([shield_message, {"shield": False}])
 
-    room.choices.append(["Pick up the shield", room, {"shield": True}, {"shield": False}, False])
+    room.choices.append(["拿起盾牌", room, {"shield": True}, {"shield": False}, False])
 
     # after ogre room
     after_ogre_room = l.sym_to_room['a']
     after_ogre_room.suppress_directions = ['South']
 
-    after_ogre_room.messages.append(["You are in a thin tunnel, you can see a glimmer of light at the far end.", {}])
+    after_ogre_room.messages.append(["你在一条狭窄的隧道里，你可以看到远处尽头的一线曙光.", {}])
 
     # exit corridor 1
     room = l.sym_to_room['b']
-    message = "The light is getting brighter! You must have found a tunnel to the surface!.\n"
+    message = "灯越来越亮了!你一定找到了一条通往地面的隧道!.\n"
     room.messages.append([message, {}])
 
     room.level_resources.append(["tunnel.png", "tunnel.png"])
 
     # exit corridor 2
     room = l.sym_to_room['c']
-    message = "Light! You see a cave exit before you, with leaves and roots hanging across it.\n"
-    message += "You've done it! You made it out of the dungeon!\n"
-    message += "Congratulations on escaping from the Dungeon of Directories!\n"
+    message = "光!你看到面前有一个洞穴出口，上面挂着树叶和树根.\n"
+    message += "你做到了!你从地牢里出来了!\n"
+    message += "恭喜你逃出了通讯录地牢!\n"
     room.messages.append([message, {}])
     room.suppress_directions = ['North', 'East', 'South', 'West']
 
@@ -699,32 +701,32 @@ def get_l2():
 
                     message = ""
                     if playerHp == 7 and ogreHp == 7:  # The player has just entered the ogre room
-                        message += "As you step into the room, you hear a rumble from overhead.\n"
-                        message += "A crack appears in the ceiling, followed by another, and another.\n"
-                        message += "Suddenly, the whole ceiling caves in, and a three metre tall hulking great big Ogre smashes through, wielding a club the size of a tree trunk.\n"
-                        message += "The rubble has blocked the door you came in by, and the only other exit is right behind the Ogre, so there's nowhere to run.\n"
+                        message += "当你走进房间时，你听到头顶传来隆隆的声音.\n"
+                        message += "天花板上出现了一条裂缝，接着是另一条，又一条.\n"
+                        message += "突然间，整个天花板都塌了下来，一个三米高的巨大食人魔冲了进来，手里挥舞着一根树干大小的棍棒.\n"
+                        message += "碎石堵住了你进来的门，唯一的出口就在食人魔后面，所以你无处可逃.\n"
                     else:
                         if hasSword:
-                            message += "You swing your sword at the ogre"
+                            message += "你对着食人魔挥剑"
                         else:
-                            message += "You jump up and slug the Ogre forcefully in the face"
+                            message += "你跳起来猛击食人魔的脸"
 
                         message += ", dealing " + get_hp_str(player_damage) + " damage.\n"
 
-                        message += "The Ogre swings his club at your chest"
+                        message += "食人魔挥舞着他的棍棒对准你的胸膛"
 
                         if hasShield:
-                            message += ", but you block with your shield. The blow still hurts quite a bit though"
+                            message += ",但你用盾牌阻挡。不过这一击还是挺疼的"
 
                         message += ", dealing " + get_hp_str(ogre_damage) + " damage.\n"
 
                     message += "Your HP; " + get_hp_str(playerHp) + ", Ogre's HP; " + get_hp_str(ogreHp)
                     room.messages.append([message, required])
 
-                    attack_message = "Attack the Ogre"
+                    attack_message = "攻击食人魔"
 
                     if hasSword:
-                        attack_message += " with your sword"
+                        attack_message += " 用你的剑"
 
                     if player_next_hp > 0 and ogre_next_hp > 0:
                         next_state = {}
@@ -732,20 +734,20 @@ def get_l2():
                         next_state.update(ogre_next_bools)
                         room.choices.append([attack_message, room, next_state, required, False])
                     elif player_next_hp == 0 and ogre_next_hp == 0:
-                        death_message = "It's been a hard battle, with a worthy foe. Both you and the Ogre are near the end of your endurance.\n"
-                        death_message += "In unison, you both attack, each one knocking the other to the ground. Your sight begins to fade.\n"
-                        death_message += "Just as you slip away, you hear the last of the life gurgle out of the Ogre. At least you got the bastard too.\n"
+                        death_message = "这是一场艰苦的战斗，与一个值得尊敬的敌人。你和食人魔都快到了忍耐的极限了.\n"
+                        death_message += "你们齐声进攻，一个把另一个打倒在地。你的视力开始衰退.\n"
+                        death_message += "就在你溜走的时候，你听到食人魔最后的生命汩汩地流出来。至少你也抓到那个混蛋了.\n"
                         room.choices.append([attack_message, l.death_room(death_message), {}, required, False])
                     elif ogre_next_hp > 0:
-                        death_message = "You move in to attack, but you are slowed by your wounds. You fumble and miss, and the Ogre's great club comes crashing down on your head.\n"
-                        death_message += "The world fades to black...\n"
+                        death_message = "你准备进攻，但是你的伤口使你的速度变慢了。你笨手笨脚，没打中，食人魔的大棍棒砸在你头上.\n"
+                        death_message += "世界渐渐变黑...\n"
                         room.choices.append([attack_message, l.death_room(death_message), {}, required, False])
                     else:
-                        message = "The Ogre is on its last legs. It aims a sideways blow at your head, but you effortlessly deflect it with your shield.\n"
-                        message += "You use the lunging momentum from the parry to swoop in under his guard, and slam your sword upwards into his head.\n"
-                        message += "The great frame topples, and you just manage to prance out of the way before he lands on you.\n"
-                        message += "You have other problems though, the roof is still caving in! You can see the exit not far from you behind the corpse of the Ogre.\n"
-                        message += "You make a run for it and just get through before the whole ceiling falls in, barring the way back.\n"
+                        message = "食人魔已经奄奄一息了。它瞄准你的头部侧身一击，但你毫不费力地用盾牌挡住了它.\n"
+                        message += "你利用招架的冲力在他的防守下猛扑过去，把你的剑向上猛击进他的脑袋.\n"
+                        message += "巨大的框架倒塌了，你只是在他落在你身上之前设法跳开了.\n"
+                        message += "但你还有其他问题，屋顶还在塌陷!你可以在食人魔的尸体后面看到离你不远的出口.\n"
+                        message += "你跑过去，在整个天花板塌下来之前穿过它，挡住了回去的路.\n"
                         win_room = l.message_room(message)
                         win_room.choices.append(["Ok", after_ogre_room, {}, {}, False])
                         room.choices.append([attack_message, win_room, {}, required, False])
