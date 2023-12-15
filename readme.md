@@ -1,5 +1,7 @@
-只是简单的中文翻译
-原作者在下面
+windwos下  下载relsease中dungeons_and_directories.zip即可游玩
+
+只是简单的中文翻译版本
+原作者：
 https://github.com/wheybags/DungeonsAndDirectories
 
 ![](readme_banner.gif)
