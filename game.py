@@ -11,10 +11,10 @@ import base64
 sys.path.append(os.path.dirname(__file__))
 
 directions = [
-    ('North', (0, -1)),
-    ('East', (1, 0)),
-    ('South', (0, 1)),
-    ('West', (-1, 0))
+    ('北', (0, -1)),
+    ('东', (1, 0)),
+    ('南', (0, 1)),
+    ('西', (-1, 0))
 ]
 
 convert_gifs_to_html = False
@@ -74,7 +74,7 @@ def finish_links():
 
     for i in range(len(directories)):
         if i % report_interval == 0:
-            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+            print("设置文件系统... " + str(int((done / total) * 100)) + "%")
         done += 1
 
         path = directories[i]
@@ -82,7 +82,7 @@ def finish_links():
 
     for i in range(len(files)):
         if i % report_interval == 0:
-            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+            print("设置文件系统.. " + str(int((done / total) * 100)) + "%")
         done += 1
 
         pair = files[i]
@@ -90,7 +90,7 @@ def finish_links():
 
     for i in range(len(symlinks)):
         if i % report_interval == 0:
-            print("setting up filesystem... " + str(int((done / total) * 100)) + "%")
+            print("设置文件系统... " + str(int((done / total) * 100)) + "%")
         done += 1
 
         pair = symlinks[i]
@@ -260,12 +260,12 @@ class Room(object):
             message = "你眼前是一间阴暗的地牢 "
 
             if len(doors):
-                message += "with " + ("doors" if len(doors) > 1 else "a door") + " exiting to the "
+                message += "和 " + ("一些门" if len(doors) > 1 else "一扇门") + " 退出到 "
 
                 if len(doors) == 1:
                     message += doors[0]
                 else:
-                    message += ", ".join(doors[:-1]) + " and " + doors[-1]
+                    message += ", ".join(doors[:-1]) + " 和 " + doors[-1]
 
                 message += "."
             else:
@@ -312,7 +312,7 @@ class Room(object):
                 to_room = self.level.rooms[new_coords[1]][new_coords[0]]
 
                 if to_room.passable:
-                    self.level.render_teleport('Move ' + dir_name, self, to_room, env, env)
+                    self.level.render_teleport('移动 ' + dir_name, self, to_room, env, env)
 
 
 class MessageRoom(Room):
@@ -492,7 +492,7 @@ def get_l1(l2):
     death_room = l.death_room(death_message)
     death_room.level_resources.append(["chasm.gif", "chasm.gif"])
 
-    room.suppress_directions = ['North']
+    room.suppress_directions = ['北']
     room.choices.append(['向北移动(试着跳过缺口)', death_room, {}, {}, False])
 
     # puddle room
@@ -507,8 +507,8 @@ def get_l1(l2):
     death_room = l.death_room(death_message)
     death_room.level_resources.append(["you.png", "you.png"])
 
-    room.suppress_directions = ['South']
-    room.choices.append(['Move South', death_room, {}, {}, False])
+    room.suppress_directions = ['南']
+    room.choices.append(['进入 南', death_room, {}, {}, False])
 
     # map room
     room = l.sym_to_room['m']
@@ -537,7 +537,7 @@ def get_l1(l2):
     # key room
     room = l.sym_to_room['k']
 
-    room.choices.append(['Pick up the key', room, {"hasKey": True}, {"hasKey": False}, False])
+    room.choices.append(['捡起钥匙', room, {"hasKey": True}, {"hasKey": False}, False])
     message = "当你走进房间的时候，你注意到一个闪亮的东西从你靴子下面的泥土里伸出来.\n"
     message += "你弯下腰去检查它。这是一把钥匙!这可能会派上用场."
     room.messages.append([message, {"hasKey": False}])
@@ -635,7 +635,7 @@ def get_l2():
 
     # after ogre room
     after_ogre_room = l.sym_to_room['a']
-    after_ogre_room.suppress_directions = ['South']
+    after_ogre_room.suppress_directions = ['南']
 
     after_ogre_room.messages.append(["你在一条狭窄的隧道里，你可以看到远处尽头的一线曙光.", {}])
 
@@ -652,7 +652,7 @@ def get_l2():
     message += "你做到了!你从地牢里出来了!\n"
     message += "恭喜你逃出了通讯录地牢!\n"
     room.messages.append([message, {}])
-    room.suppress_directions = ['North', 'East', 'South', 'West']
+    room.suppress_directions = ['北', '东', '南', '西']
 
     room.level_resources.append(["Secret club for people who finished the game.html", "Secret club for people who finished the game.html"])
 
@@ -660,7 +660,7 @@ def get_l2():
     # ogre room
     room = l.sym_to_room['o']
 
-    room.suppress_directions = ['South', 'East', 'North', 'West']
+    room.suppress_directions = ['南', '东', '北', '西']
     room.level_resources.append(["ogre.gif", "ogre.gif"])
 
     hp_table = [(False, False, False), (False, False, True), (False, True, False), (False, True, True),
@@ -711,16 +711,16 @@ def get_l2():
                         else:
                             message += "你跳起来猛击食人魔的脸"
 
-                        message += ", dealing " + get_hp_str(player_damage) + " damage.\n"
+                        message += ", 计算 " + get_hp_str(player_damage) + " 伤害.\n"
 
                         message += "食人魔挥舞着他的棍棒对准你的胸膛"
 
                         if hasShield:
                             message += ",但你用盾牌阻挡。不过这一击还是挺疼的"
 
-                        message += ", dealing " + get_hp_str(ogre_damage) + " damage.\n"
+                        message += ", 计算 " + get_hp_str(ogre_damage) + " 伤害.\n"
 
-                    message += "Your HP; " + get_hp_str(playerHp) + ", Ogre's HP; " + get_hp_str(ogreHp)
+                    message += "你的 HP; " + get_hp_str(playerHp) + ", 食人魔的 HP; " + get_hp_str(ogreHp)
                     room.messages.append([message, required])
 
                     attack_message = "攻击食人魔"
@@ -775,7 +775,7 @@ def __main__():
     elif sys.platform.startswith('linux'):
         instructions_room.level_resources.append(["instructions_linux.png", "instructions_linux.png"])
 
-    instructions_room.choices.append(["Start (Read instructions first!)", l1.sym_to_room['@'], {}, {}, False])
+    instructions_room.choices.append(["开始(先阅读说明!)", l1.sym_to_room['@'], {}, {}, False])
 
     l2.render()
     l1.render()
